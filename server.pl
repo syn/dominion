@@ -104,13 +104,15 @@ sub server_tick {
 		print Dumper($state);
 	    given ( $state->{state} ) {
 	        when ( 'gameover' ) {
-	            print "Game over\n";
-	            print "---------\n";
+	            my @results = ();
 	            foreach my $player ( $game->players ) {
-	                my $vp = $player->deck->total_victory_points;
-	                printf "%s => %d points (%d cards)\n", $player->name, $vp, $player->deck->count;
-	            }
-	            exit 0;
+					
+					my $vp = player->deck->total_victory_points;
+					push (@results ,{
+						name   =>  $player->name,
+						vp => $vp });
+				}
+				Dominion::Com::Messages::EndGame->new(results => @results)->send_to_everyone();
 	        }
 	        when ( 'action' ) {
 	        	
