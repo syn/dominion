@@ -108,10 +108,12 @@ sub server_tick {
 	            my @results;
 	            foreach my $player ( $game->players ) {
 					my $vp = $player->deck->total_victory_points;
-					push (@results ,{
-						name   =>  $player->name,
-						vp => $vp }
-					);
+					my $res = {	name   =>  $player->name, vp => $vp };
+					foreach my $card ( $player->deck->cards ) {
+	                    next unless $card->is('victory');
+	                    $res->{$card->name}++;
+                	}
+					push (@results , $res);
 				}
 				Dominion::Com::Messages::EndGame->new(results => [@results])->send_to_everyone($game);
 	        }
