@@ -55,6 +55,7 @@ websocket '/' => sub {
 							#Tell everyone that you brought a card
 							Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p)->send_to_everyone_else($p);
 							send_hand($p);
+							Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game); 
 							server_tick($game);
 						}
 						
