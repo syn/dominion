@@ -9,6 +9,9 @@ use JSON;
 use Data::Dumper;
 
 use Dominion::Game;
+use Dominion::Com::Messages;
+
+
 my $clients     = {};  #List of all clients.
 my $game = Dominion::Game->new;
 my $playercount = 0; #The number of players we have seen so far, only used for sequential initial names
@@ -70,14 +73,14 @@ sub player_connected {
 	my ($game,$p) = @_;
 
 	#Send some game state.
-	Dominion::Com::Messages::InitialSetup->new(gamestatus => $game->state , name => $p->name)->send_to_player($p);
+	Dominion::Com::Messages::InitialSetup->new(gamestatus => $game->state->{'state'} , name => $p->name)->send_to_player($p);
     
 	#Send everyone else a message that the player joined the game.
 	Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$p)->send_to_everyone($game);
 	#Send this player a message about everyone else who is in the game
 	 foreach my $player ( $game->players ) {
      	if($player!=$p) {
-     		my $c = Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,playerid=>$player);
+     		my $c = Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$player);
      		$c->send_to_player($p);
      	}
     }
