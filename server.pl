@@ -54,21 +54,28 @@ websocket '/' => sub {
 							my $card = $game->active_player->buy($message->{'card'});
 							#Tell everyone that you brought a card
 							Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p)->send_to_everyone_else($p);
+							send_hand($p);
 							server_tick($game);
 						}
 						
 						when ('finishturn') {
+							my $p = $game->active_player;
 							$player->cleanup_phase;
+							send_hand($p);
 							server_tick($game);
 						}
 						when ('finishactionphase') {
+							my $p = $game->active_player;
 							$player->buy_phase;
+							send_hand($p);
 							server_tick($game);
 						}
 						when ('playcard') {
+							my $p = $game->active_player;
 							my $card = $game->active_player->play($message->{'card'});
 							#Tell everyone that you played a card
-							
+							Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p)->send_to_everyone_else($p);
+							send_hand($p);
 							server_tick($game);
 						}
 						default {print Dumper($message);}

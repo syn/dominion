@@ -96,6 +96,7 @@ sub play {
     $card->action($self, $self->game);
 
     $self->buy_phase if $self->actions == 0 or $self->hand->grep(sub { $_->is('action') }) == 0;
+    return $card;
 }
 
 sub buy_phase {
