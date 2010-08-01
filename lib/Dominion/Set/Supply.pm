@@ -87,6 +87,39 @@ sub current_piles {
     return $piles;
 }
 
+
+
+#Builds a summary of the supply suitable for sending to the client.
+sub summary {
+    my ($self) = @_;
+
+    my %data;
+
+    foreach my $card ( $self->cards ) {
+        if(exists ($data{$card->name})) {
+        	$data{$card->name}->count($data{$card->name}->count+1);
+        } else {
+        	$data{$card->name} = $card->new;
+        }
+    }
+ 	return [(values %data)];
+    #my @arr;
+    #foreach my $key (keys %data) {
+    #	push(@arr,$data{$key});
+    #}
+    #return sort sortcards @arr;
+}
+#Sorts the cards in the summary in order of
+#Curses
+#Treasure
+#Victory
+#Action
+sub sortcards {
+	#if( $a->group != $b->group) {
+	#	return $a->group <=> $b->group;
+	#}
+	return $a->cost_gold <=> $b->cost_gold;
+}
 sub TO_JSON {
 	my ($self) = @_;
 	my $data;
