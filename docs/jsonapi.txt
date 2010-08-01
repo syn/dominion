@@ -1,0 +1,233 @@
+List of calls
+
+Ever Json call has a type element which identifies the type of json call this is for
+
+Json from the client to the server
+
+namechange
+A player has requsted to change thier name.
+type = "namechange"
+name = New player name
+Example: {"type":"namechange","name":"Syn"}
+
+buycard
+A player has tried to buy a card
+type = "buycard"
+card = String name of card brought
+Example: {"type":"buycard","card":"Province"}
+Example: {"type":"buycard","card":"Smithy"}
+
+
+playcard
+A player has tried to play an action card
+type = "playcard"
+card = String name of the card played
+Example: {"type":"playcard","card":"Smithy"}
+
+startgame
+A player has pressed the start game button.
+type = "startgame"
+Example: {"type":"startgame"}
+
+finishturn
+A player has finished their turn early
+type = "finishturn"
+Example: {"type":"finishturn"}
+
+finishactionphase
+A player has indicated they want to finish their action phase early
+type ="finishactionphase"
+Example: {"type":"finishactionphase"}
+
+witchResolved
+A player has taken some action to resolve a witch attack.
+type = "witchResolved"
+option = String for the card played, either a "Moat" or "Curse"
+Example: {"type":"witchResolved","option":"Curse"}
+
+bureaucratResolved
+A player has taken some action to resolve a bureaucrat attack.
+type = "bureaucratResolved"
+option = 
+card = String victory card to be removed from thier hand and put on their deck.
+Example: {"type":"bureaucratResolved","option":"Victory","card":"Estate"}
+
+
+militiaResolved
+A player has taken some action to resolve a militia attack.
+type = "militiaResolved"
+option = 
+card = Discards played to drop down to 3 cards.
+Example: {"type":"militiaResolved","option":"Victory","card":["Estate","Copper"]}
+
+message
+A chat message sent from the player to the server
+type = "message"
+message = String, for the text a player has typed into the chat box.
+Example: {"type":"message","message":"Hello there
+
+choiceresponse
+A response sent back to the server after a choice action has been resolved by the client.
+type = "choiceresponse"
+event = String : name of the event that was selected,
+card = String (optional) : card that was brough, discarded,trashed or played.
+
+
+Json from the server to the client.
+
+message
+A chat message sent from the server to the client
+type = "message"
+from = String : player who orginally sent the message
+message = String : message from the player
+id = Integer : server message id
+Example : : {"from":"player1","id":101,"type":"message","message":"Hello there"}
+
+InitialSetup
+Perfome some inital setup for when a client has just connected, currently just tell them thier name.
+type = "InitialSetup"
+name = String : Initial players name for this client (player1, player2 etc)
+gamestatus = String, current game status (pregame,Inprogress,gamefinished)
+id = Integer : server message id;
+Example : {"name":"player1","id":0,"type":"InitialSetup","gamestatus":"pregame"}
+
+playerstatus
+Update the status of a player
+type = 'playerstatus'
+action = String: Type of player status update this is ('joined','waiting','donewaiting','namechange','finishedturn','quit');
+playerid = Integer : Id to uniquely identify this player, dosen't change across name changes etc.
+name = String : current name of the player
+id = Integer : server message id
+Example : {"playerid":1,"name":"player1","action":"joined","id":2,"type":"playerstatus"}
+
+startgame
+Indicate to all the connected clients that the game has been started.
+type = 'startgame'
+playerid = Integer: ID to uniquely identify the player that started the game.
+name = String : name of the player that started the game.
+id = Integer : server message id
+Example : {"playerid":1,"name":"player1","id":3,"type":"startgame"}
+
+supply
+Send the player an updated supply list.
+This is used both at the start of the game, and when the one or more of the cards have been brought.
+type  = 'supply'
+supply = Array : Cards in the supply, sorted by the order they should be displayed in the supply see *card
+id = Integer : server message id
+Example : {"id":4,"type":"supply","supply":[{"value":0,"name":"Curse","vp":-1,"image":"curse.jpg","costgold":0,"order":1,"type":"Curse","available":30},{"order":2,"value":1,"name":"Copper","type":"Treasure","image":"copper.jpg","available":50,"costgold":0},{"order":2,"value":2,"name":"Silver","type":"Treasure","image":"silver.jpg","available":50,"costgold":3},{"order":2,"value":3,"name":"Gold","type":"Treasure","image":"gold.jpg","available":50,"costgold":6},{"value":0,"name":"Estate","vp":1,"image":"estate.jpg","costgold":2,"order":3,"type":"Victory","available":12},{"value":0,"name":"Duchy","vp":3,"image":"duchy.jpg","costgold":5,"order":3,"type":"Victory","available":12},{"value":0,"name":"Province","vp":6,"image":"province.jpg","costgold":8,"order":3,"type":"Victory","available":1},{"value":0,"name":"Moat","vp":0,"image":"moat.jpg","costgold":2,"order":4,"type":"Action\/Reaction","extracard":2,"available":10},{"extrabuy":1,"value":2,"name":"Woodcutter","vp":0,"image":"woodcutter.jpg","costgold":3,"order":4,"type":"Action","extraaction":0,"extracard":0,"available":10},{"value":0,"name":"Village","vp":0,"image":"village.jpg","costgold":3,"order":4,"type":"Action","extraaction":2,"extracard":1,"available":10},{"value":0,"name":"Bureaucrat","vp":0,"image":"bureaucrat.jpg","costgold":4,"special":"CODE(0x9b15850)","order":4,"type":"Action\/Attack","available":10},{"value":2,"name":"Militia","vp":0,"image":"militia.jpg","costgold":4,"special":"CODE(0x9b15440)","order":4,"type":"Action\/Attack","available":10},{"value":0,"name":"Smithy","vp":0,"image":"smithy.jpg","costgold":4,"order":4,"type":"Action","extracard":3,"available":10},{"value":0,"name":"Witch","vp":0,"image":"witch.jpg","costgold":5,"special":"CODE(0x9b0c678)","order":4,"type":"Action","extracard":2,"available":10},{"value":0,"name":"CouncilRoom","vp":0,"image":"councilroom.jpg","costgold":5,"special":"CODE(0x9b0ca88)","order":4,"type":"Action","extracard":4,"available":10},{"extrabuy":1,"value":2,"name":"Festival","vp":0,"image":"festival.jpg","costgold":5,"order":4,"type":"Action","extraaction":2,"extracard":0,"available":10},{"extrabuy":1,"value":1,"name":"Market","vp":0,"image":"market.jpg","costgold":5,"order":4,"type":"Action","extraaction":1,"extracard":1,"available":10}]}
+
+*card
+name  = String : Name of the card
+type = String : type of card ('Treasure','Curse','Victory','Action','Action/Attack','Action/Reaction')
+costgold => Integer : Cost in goll to buy this card
+available => Integer: Cards remaining to purchase
+image => String : Name of the image to display for this card
+
+newhand
+New hand is sent to the player at the start of the game, and in the cleanup phase of each turn.
+type = 'newhand'
+cards = Array : Cards in the players hand sorted by the order they were drawn from the deck, see *card ;
+id = Integer : server message id
+Example : {"cards":[{"order":2,"value":1,"name":"Copper","type":"Treasure","image":"copper.jpg","available":50,"costgold":0},{"value":0,"name":"Estate","vp":1,"image":"estate.jpg","costgold":2,"order":3,"type":"Victory","available":12},{"order":2,"value":1,"name":"Copper","type":"Treasure","image":"copper.jpg","available":50,"costgold":0},{"order":2,"value":3,"name":"Gold","type":"Treasure","image":"gold.jpg","available":50,"costgold":6},{"value":0,"name":"Estate","vp":1,"image":"estate.jpg","costgold":2,"order":3,"type":"Victory","available":12}],"id":5,"type":"newhand"}
+
+
+
+endgame
+Tell everyone the game has ended.
+type ='endgame'
+results = Array of players and their scores. see *playerscore
+id = Integer : server message id
+Example : {"id":105,"type":"endgame","results":[{"name":"player2","vp":13},{"name":"player1","vp":28}]}
+
+
+extracards
+Used when a player has gained extra cards from an action they have played, like a smithy, or from an extra card they have gain from an action another player did like a council room.
+tye ='extracards'
+cards = Array: Cards to add to the players hand see *card
+id = Integer : server message id
+Example : {"cards":[{"order":2,"value":1,"name":"Copper","type":"Treasure","image":"copper.jpg","available":49,"costgold":0},{"value":0,"name":"Smithy","vp":0,"image":"smithy.jpg","costgold":4,"order":4,"type":"Action","extracard":3,"available":7},{"value":0,"name":"Estate","vp":1,"image":"estate.jpg","costgold":2,"order":3,"type":"Victory","available":12}],"id":99,"type":"extracards"}
+
+
+startphasebuy
+Instructs a player to start the buy phase
+type ='startphasebuy'
+buys = Integer : Number of buys the player has
+gold = Integer : Amount of gold a player has to buy.
+id = Integer : server message id
+Example : {"gold":11,"id":25,"type":"startphasebuy","buys":1}
+
+
+cardplayed
+Inform the player that someone did something with a card.
+type = 'cardplayed'
+card = Card : Card that was played, see *card
+actiontype = String : type of action that was used to play this card (cardbrought,actionplayed,witchresolve,bureaucratresolve,Militiaresolve)
+playerid = Integer: ID to uniquely identify the player that started the game.
+name = String : name of the player that started the game.
+id = Integer : server message id
+Example : {"playerid":1,"card":{"extrabuy":1,"value":2,"name":"Festival","vp":0,"image":"festival.jpg","costgold":5,"order":4,"type":"Action","extraaction":2,"extracard":0,"available":9},"name":"player1","id":17,"actiontype":"cardbrought","type":"cardplayed"}
+Example : {"playerid":1,"card":{"value":0,"name":"Curse","vp":-1,"image":"curse.jpg","costgold":0,"order":1,"type":"Curse","available":29},"name":"player1","id":86,"actiontype":"witchresolve","type":"cardplayed"}
+
+
+startactionphase
+Instructs a player to start the action phase
+type = 'startactionphase'
+actions = Integer : number of actions this player has
+gold = Integer : amount of gold this player has
+id = Integer : server message id
+Example : {"gold":0,"actions":1,"id":68,"type":"startactionphase"}
+
+actionresolved
+Sent whenever the server has finished resolving an action card for both simple actions, like Market and when complex actions like witch have been fully resolved.
+type='actionresolved'
+actions = Integer : number of actions the player now has. Note, this may be 0, but the client still gets informed that the action card has been resolved.
+gold = Integer : The amount of gold the player has to spend if they ended thier action phase now.
+id = Integer : server message id
+Example : {"actions":0,"id":89,"type":"actionresolved"}
+
+attack
+Sent to a client to get them to resolve some kind of attack.
+type = 'attack'
+card = String : Name of the card doing the attack
+playerid = Integer: ID to uniquely identify the player that started the game.
+name = String : name of the player that started the attack.
+id = Integer : server message id
+Example : {"playerid":2,"card":"Witch","name":"player2","id":83,"type":"attack"}
+
+
+
+choice
+This is used to aske the client to perfom some kind of action or choice.
+type ='choice'
+choice = Array : array of choices that the client has to choose from, for now only one choice may be choosen, if multiple responses are required the server will have to ask again.
+message = String : Status message to display to the user.
+cause = String : Card name that caused this action.
+playerid = Integer: Playerd id who initiated this request.
+name = String : name of the player that started this request
+id = Integer : server message id
+
+
+Each choice may be one of
+
+button
+type = 'button'
+event = String : name of the event to send back to the server if the button is clicked
+name = String : name to give the button
+
+trash 
+type = 'trash'
+event = String : name of the event to send back to the server if a card is trashed
+cards = Array of *cards : Cards from the hand that may be trashed for this choice
+
+buy 
+type = 'buy'
+event = String : name of the event to send back to the server if a card is brought
+cards = Array of *cards : Cards from the supply that may be brought for this choice
+
+discard 
+type = 'discard'
+event = String : name of the event to send back to the server if a card is discarded
+cards = Array of *cards : Cards from the hand that may be discarded for this choice
+
+
+

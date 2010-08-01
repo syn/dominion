@@ -1,0 +1,238 @@
+html, body {
+height: 100%;
+}
+
+#supply, #discard, #play, #hand, #trash {
+	-webkit-user-select: none;
+}
+
+#leftcol {
+width:70%;
+float:left;
+height:100%;	
+}
+#rightcol {
+width:28%;
+float:left;
+height:100%;
+       padding-left:1.5%;	
+}
+#supply {
+	border-radius: 10px;
+border: 5px solid #c4c8cc;
+width:70%;
+float:left;
+height:42%;
+       margin-right:1%;
+       margin-bottom:1%;
+}
+
+#supply.buy {
+border: 5px solid #00E83F;
+}
+#supply.attack {
+border: 5px solid red;
+}
+
+#play {
+	border-radius: 10px;
+border: 5px solid #c4c8cc;
+width:85%;
+float:left;
+height:27%;
+       margin-bottom:1%;
+}
+#play .info {
+clear:right;
+}
+#play h2 {
+width:20%;
+float:left;	
+height:20px;
+}
+
+#play #playstatus {
+float:leff;
+padding:5px 0px 0px 0px;
+}
+#discard {
+	border-radius: 10px;
+border: 5px solid #c4c8cc;
+width:12%;
+float:right;
+height:27%;
+       margin-left:1%;
+       margin-bottom:1%;
+}
+#discard.discardon {
+	border: 5px solid yellow;
+}
+
+#trash {
+	border-radius: 10px;
+border: 5px solid #c4c8cc;
+width:12%;
+float:left;
+height:22%;
+       margin-right:1%;
+       margin-bottom:1%;
+}
+#trash.trashon {
+border: 5px solid brown;
+}
+#play.ui-droppable {
+border: 5px solid #62C7FC;
+}
+
+#hand {
+	border-radius: 10px;
+	border: 5px solid #c4c8cc;
+	width:69%;
+	float:left;
+	height:22%;
+	margin-right:1%;
+	overflow:hidden;
+}
+
+#handcards {
+	width:100%;
+	max-height:90%;
+	float:left;
+	overflow:auto;	
+}
+#handcards img.card {
+	
+}
+#hand.action {
+	border: 5px solid #00E83F;
+}
+#hand.attack {
+	border: 5px solid red;
+}
+
+#chat {
+	border-radius: 10px;
+	border: 5px solid #e7e7e7;
+	width:27%;
+	float:left;
+	height:42%;
+	margin-bottom:1%;
+}
+
+#chatdisplay {
+	overflow-y:scroll;
+	height:90%;
+	border-bottom:3px solid #e7e7e7;
+	width:98%;
+	padding:5px;
+	margin: 0px 0px 0px 0px;
+}
+
+#chatname {
+	width:15%;
+	float:left;
+	margin-right:10px;
+	padding:5px 0px 0px 5px;	
+}
+#messageform {
+	float:left;
+	width:80%;	
+}
+#message-box {
+	width:100%;	
+}
+
+#playedcards {
+	overflow: hidden;
+    white-space: nowrap;
+    float:left;
+    clear:left;
+}
+
+#control {
+	border-radius: 10px;
+	border: 5px solid #c4c8cc;
+	width:14%;
+	float:right;
+	height:22%;
+}
+
+
+#supply img.card {
+	max-height:43%;
+	max-width:9%;
+	float:left;
+}
+
+#hand img.card {
+	max-height:84%;
+	max-width:9%;
+}
+
+img.card {
+	border:1px solid grey;
+	border-radius: 9px;
+	margin:5px;
+}
+
+/*
+.card-Copper   		{background-image:url('../images/copper.jpg');}
+.card-Silver   		{background-image:url('../images/silver.jpg');}
+.card-Gold     		{background-image:url('../images/gold.jpg');}
+.card-Estate   		{background-image:url('../images/estate.jpg');}
+.card-Duchy    		{background-image:url('../images/duchy.jpg');}
+.card-Province 		{background-image:url('../images/province.jpg');}
+.card-Curse    		{background-image:url('../images/curse.jpg');}
+.card-Market   		{background-image:url('../images/market.jpg');}
+.card-Moat     		{background-image:url('../images/moat.jpg');}
+.card-Bureaucrat  	{background-image:url('../images/bureaucrat.jpg');}
+.card-Chapel     	{background-image:url('../images/chapel.jpg');}
+.card-Feast   		{background-image:url('../images/feast.jpg');}
+.card-Workshop     	{background-image:url('../images/workshop.jpg');}
+.card-Witch   		{background-image:url('../images/witch.jpg');}
+.card-Militia     	{background-image:url('../images/militia.jpg');}
+.card-Smithy   		{background-image:url('../images/smithy.jpg');}
+.card-Spy     		{background-image:url('../images/spy.jpg');}
+.card-Village  		{background-image:url('../images/village.jpg');}
+.card-Woodcutter 	{background-image:url('../images/woodcutter.jpg');}
+*/
+
+.info {
+	margin:0px 0px 0px 15px;
+	padding:0px;	
+}
+.info h2 {
+	margin:0px;
+	padding:0px;
+}
+
+.turn {
+	color:green;
+}
+.waiting {
+	color:red;
+}
+
+.playareaupdate {
+	border:1px solid grey;
+	border-radius: 5px;
+	display: inline-block;	
+	margin:4px;
+}
+.playareaupdate h4 {
+	margin:2px;
+	padding:0px;
+}
+
+.cardcount {
+	float:left;
+	border:1px solid grey;
+	border-radius: 8px;
+	padding:1px 2px;
+	margin-left:-20px;
+	background-color:red;
+	color:white;
+	font-weight:bold;
+	text-align:center;
+	width:15px;
+}
