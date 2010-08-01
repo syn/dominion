@@ -40,7 +40,7 @@ websocket '/' => sub {
 					
 					#send the supply to all the players
 					Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game); 
-					
+					server_tick($game);
 				}
 #				when ('choiceresponse') {
 #					given($message->{'event'}) {
@@ -67,6 +67,42 @@ websocket '/' => sub {
 		}
 	);
 };
+
+
+sub server_tick {
+	my ($game) = @_;
+	if ( $game->active_player ) {
+	    my $state = $game->state;
+	
+	    given ( $state->{state} ) {
+	        when ( 'gameover' ) {
+	            print "Game over\n";
+	            print "---------\n";
+	            foreach my $player ( $game->players ) {
+	                my $vp = $player->deck->total_victory_points;
+	                printf "%s => %d points (%d cards)\n", $player->name, $vp, $player->deck->count;
+	            }
+	            exit 0;
+	        }
+	        when ( 'action' ) {
+	            my $card_name = ($game->active_player->hand->cards_of_type('action'))[0]->name;
+	            $game->active_player->play($card_name);
+	        }
+	        when ( 'buy' ) {
+	            #Send a choice to the player 
+				my $choice = Dominion::Com::Messages::Choice->new(message => 'Buy phase - Buys:' . $state->{buys} . ' Gold:' . $state->{coid});
+				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishturn', name=>'Finish Buy Phase Early');
+					
+				my $option2 = Dominion::Com::Messages::Options::Buy->new(event => 'cardbrought',cards => [map { $_ } grep { $_->cost_coin == $state->{coin} } $game->supply->cards]);
+			
+				$choice->add($option1);
+				$choice->add($option2);
+				$choice->send_to_player($game->active_player);
+	        }
+	        default { die "Can't deal with state: $state->{state}" }
+	    }
+	}
+}
 
 
 sub player_connected {
