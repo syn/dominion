@@ -102,7 +102,7 @@ sub summary {
         	$data{$card->name} = $card->new;
         }
     }
- 	return [(values %data)];
+ 	return (values %data);
     #my @arr;
     #foreach my $key (keys %data) {
     #	push(@arr,$data{$key});

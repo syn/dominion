@@ -32,9 +32,11 @@ sub remove_from_current_set {
 
 sub TO_JSON {
 	my ($self) = @_;
+	my $n = lc($self->name) .".jpg";
+	$n =~ s/\s+//g;
 	return {
 		name => $self->name,
-		image => lc($self->name) .".jpg",
+		image => $n,
 		available => $self->count,
 	};
 }
