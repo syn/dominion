@@ -118,7 +118,8 @@ sub server_tick {
 				Dominion::Com::Messages::EndGame->new(results => [@results])->send_to_everyone($game);
 	        }
 	        when ( 'action' ) {
-	        	
+	        	#make sure they have the most recent hand
+	        	send_hand($game->active_player);
 	        	#Send a choice to the player 
 				my $choice = Dominion::Com::Messages::Choice->new(message => 'Start action phase');
 				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishactionphase', name=>'Finish Action Phase Early');
@@ -131,6 +132,7 @@ sub server_tick {
 				$choice->send_to_player($game->active_player);
 	        }
 	        when ( 'buy' ) {
+	        	send_hand($game->active_player);
 	            #Send a choice to the player 
 				my $choice = Dominion::Com::Messages::Choice->new(message => 'Buy phase');
 				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishturn', name=>'Finish Buy Phase Early');
