@@ -145,8 +145,6 @@ border: 5px solid #62C7FC;
 #playedcards {
 	overflow: hidden;
     white-space: nowrap;
-    float:left;
-    clear:left;
 }
 
 #control {
@@ -156,7 +154,6 @@ border: 5px solid #62C7FC;
 	float:right;
 	height:22%;
 }
-
 
 #supply img.card {
 	max-height:43%;
