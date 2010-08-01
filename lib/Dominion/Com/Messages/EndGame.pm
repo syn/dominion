@@ -4,8 +4,6 @@ use Moose;
 extends 'Dominion::Com::Message';
 
 has '+type'      => default => 'endgame';
-has 'results' => ( isa => 'Str', is => 'rw', required => 1 );
-
 has 'results' => (
     traits   => ['Array'],
     default  => sub { [] },
@@ -22,7 +20,7 @@ sub TO_JSON {
 	my ($self) = @_;
 	return {
 		type      => $self->type,
-		results   => $self->results,		
+		results   => [$self->results],		
 	};
 }
 1;

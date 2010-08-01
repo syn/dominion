@@ -105,15 +105,15 @@ sub server_tick {
 		print Dumper($state);
 	    given ( $state->{state} ) {
 	        when ( 'gameover' ) {
-	            my @results = ();
+	            my @results;
 	            foreach my $player ( $game->players ) {
-					
-					my $vp = player->deck->total_victory_points;
+					my $vp = $player->deck->total_victory_points;
 					push (@results ,{
 						name   =>  $player->name,
-						vp => $vp });
+						vp => $vp }
+					);
 				}
-				Dominion::Com::Messages::EndGame->new(results => @results)->send_to_everyone();
+				Dominion::Com::Messages::EndGame->new(results => [@results])->send_to_everyone($game);
 	        }
 	        when ( 'action' ) {
 	        	
@@ -133,7 +133,7 @@ sub server_tick {
 				my $choice = Dominion::Com::Messages::Choice->new(message => 'Buy phase');
 				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishturn', name=>'Finish Buy Phase Early');
 					
-				my $option2 = Dominion::Com::Messages::Options::Buy->new(event => 'cardbrought',cards => [map { $_ } grep { $_->cost_coin == $state->{coin} } $game->supply->cards]);
+				my $option2 = Dominion::Com::Messages::Options::Buy->new(event => 'cardbrought',cards => [map { $_ } grep { $_->cost_coin <= $state->{coin} } $game->supply->cards]);
 			
 				$choice->add($option1);
 				$choice->add($option2);
