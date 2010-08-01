@@ -8,7 +8,9 @@ sub box         { die 'Box is required (' . ref(shift) . ')' }
 sub cost_coin   { die 'Coin cost is required (' . ref(shift) . ')' }
 sub cost_potion { die 'Potion cost is required (' . ref(shift) . ')' }
 
+
 has 'in_set' => ( isa => 'Dominion::Set', is => 'rw', trigger => \&remove_from_current_set );
+has 'count'     => ( isa => 'Int', is => 'rw', default => 1);
 
 sub is {
     my ($self, $tag) = @_;
@@ -32,8 +34,6 @@ sub TO_JSON {
 	my ($self) = @_;
 	return {
 		name => $self->name,
-		type => $self->type,
-		cost_coin => $self->cost_coin,  
 		image => lc($self->name) .".jpg",
 		available => $self->count,
 	};
