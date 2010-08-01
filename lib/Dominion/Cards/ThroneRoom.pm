@@ -3,7 +3,7 @@ package Dominion::Cards::ThroneRoom;
 use Moose;
 extends 'Dominion::Card';
 
-sub name        { 'Throne Room' }
+sub name        { 'ThroneRoom' }
 sub tags        { qw(kingdom action) }
 sub box         { 'Dominion' }
 sub cost_coin   { 4 }
