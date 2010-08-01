@@ -203,11 +203,14 @@ img.card {
 	padding:0px;
 }
 
-.turn {
+#playerstatus .action {
 	color:green;
 }
-.waiting {
-	color:red;
+#playerstatus .buy {
+	color:blue;
+}
+#playerstatus .waiting {
+	color:black;
 }
 
 .playareaupdate {
