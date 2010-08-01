@@ -38,6 +38,11 @@ websocket '/' => sub {
 					#Send everyone a message telling them that game has started.
 					Dominion::Com::Messages::StartGame->new()->send_to_everyone($game);
 					
+					#Send everyone thier hand
+					foreach my $player ( $game->players ) {
+						send_hand($player);
+					}
+					
 					#send the supply to all the players
 					Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game); 
 					server_tick($game);
@@ -62,6 +67,8 @@ websocket '/' => sub {
 						}
 						when ('playcard') {
 							my $card = $game->active_player->play($message->{'card'});
+							#Tell everyone that you played a card
+							
 							server_tick($game);
 						}
 						default {print Dumper($message);}
@@ -145,6 +152,11 @@ sub player_connected {
     }
 }
 
+sub send_hand {
+	my ($player) = @_;	
+	my $c = Dominion::Com::Messages::Hand->new(cards => $player->hand);
+	$c->send_to_player($player);
+}
 sub chat_message {
 	my ($game,$p,$incomingmessag) = @_;
 	my $c = Dominion::Com::Messages::Chat->new(message => $incomingmessag->{'message'} , from => $p->name);

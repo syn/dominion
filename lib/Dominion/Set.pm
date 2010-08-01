@@ -91,5 +91,10 @@ sub card_by_name {
     return $card;
 }
 
+sub TO_JSON {
+	my ($self) = @_;
+	return [$self->cards];
+}
+
 #__PACKAGE__->meta->make_immutable;
 1;
