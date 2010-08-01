@@ -84,8 +84,13 @@ sub current_piles {
         $piles->{$card->name} //= 0;
         $piles->{$card->name}++;
     }
-
     return $piles;
+}
+
+sub TO_JSON {
+	my ($self) = @_;
+	my $data;
+	return [$self->summary];
 }
 
 #__PACKAGE__->meta->make_immutable;
