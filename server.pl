@@ -42,19 +42,31 @@ websocket '/' => sub {
 					Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game); 
 					server_tick($game);
 				}
-#				when ('choiceresponse') {
-#					given($message->{'event'}) {
-#						when ('cardbrought') {$player->buy_card($message->{'card'})}
-#						when ('finishturn') {$player->cleanup_phase}
-#						when ('finishactionphase') {$player->buy_phase}
-#						when ('playcard') {
-#							if($game->supply->find_card($message->{'card'})->play($player)) {
-#								$player->action_phase;
-#							};
-#						}
-#						default {print Dumper($message);}
-#					}
-#				}			
+				when ('choiceresponse') {
+					given($message->{'event'}) {
+						when ('cardbrought') {
+							my $p = $game->active_player; #have to save the active_player here, the buy function will change it on us
+							my $card = $game->active_player->buy($message->{'card'});
+							#Tell everyone that you brought a card
+							Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p)->send_to_everyone_else($p);
+							server_tick($game);
+						}
+						
+						when ('finishturn') {
+							$player->cleanup_phase;
+							server_tick($game);
+						}
+						when ('finishactionphase') {
+							$player->buy_phase;
+							server_tick($game);
+						}
+						when ('playcard') {
+							my $card = $game->active_player->play($message->{'card'});
+							server_tick($game);
+						}
+						default {print Dumper($message);}
+					}
+				}			
 				default {print Dumper($message);}
 			}			
 		}
@@ -70,10 +82,12 @@ websocket '/' => sub {
 
 
 sub server_tick {
+	
 	my ($game) = @_;
+	print "Server Tick\n";
 	if ( $game->active_player ) {
 	    my $state = $game->state;
-	
+		print Dumper($state);
 	    given ( $state->{state} ) {
 	        when ( 'gameover' ) {
 	            print "Game over\n";
@@ -85,12 +99,21 @@ sub server_tick {
 	            exit 0;
 	        }
 	        when ( 'action' ) {
-	            my $card_name = ($game->active_player->hand->cards_of_type('action'))[0]->name;
-	            $game->active_player->play($card_name);
+	        	
+	        	#Send a choice to the player 
+				my $choice = Dominion::Com::Messages::Choice->new(message => 'Start action phase');
+				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishactionphase', name=>'Finish Action Phase Early');
+				#TODO only send the cards that can be played.
+				
+				my $option2 = Dominion::Com::Messages::Options::Play->new(event => 'playcard',cards => [$game->active_player->hand->cards_of_type('action')]);
+				
+				$choice->add($option1);
+				$choice->add($option2);
+				$choice->send_to_player($game->active_player);
 	        }
 	        when ( 'buy' ) {
 	            #Send a choice to the player 
-				my $choice = Dominion::Com::Messages::Choice->new(message => 'Buy phase - Buys:' . $state->{buys} . ' Gold:' . $state->{coid});
+				my $choice = Dominion::Com::Messages::Choice->new(message => 'Buy phase');
 				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishturn', name=>'Finish Buy Phase Early');
 					
 				my $option2 = Dominion::Com::Messages::Options::Buy->new(event => 'cardbrought',cards => [map { $_ } grep { $_->cost_coin == $state->{coin} } $game->supply->cards]);

@@ -126,6 +126,7 @@ sub buy {
     $self->discard->add($card);
 
     $self->cleanup_phase if $self->buys == 0;
+    return $card;
 }
 
 sub cleanup_phase {
