@@ -114,34 +114,33 @@ function init() {
 			return;
 		}
 		if (com.type =='playerstatus') {
-			if(com.action == 'joined') {
+			switch(com.action)
+			{
+			case 'joined':
 				var playerstatus = document.createElement('li');
 				playerstatus.setAttribute("id", "playerstatus"+com.playerid);
 				playerstatus.innerHTML=com.name;
 				document.getElementById('playerstatus').appendChild(playerstatus);
-			}
-			if(com.action == 'namechange') {
+				break;
+			case 'namechange':
 				document.getElementById("playerstatus"+com.playerid).innerHTML=com.name;
-			}
-			if(com.action == 'quit'){
+				break;
+			case 'quit':
 				addChatMessage('System',com.name + " has left.");
 				document.getElementById('playerstatus').removeChild(document.getElementById("playerstatus"+com.playerid));
-			}
-			if(com.action == 'startturn'){
-				actioncount++;
-				addChatMessage('System',com.name + " is starting their turn.");
-				addClass(document.getElementById("playerstatus"+com.playerid),'turn');
-				document.getElementById("playstatus").innerHTML=com.name + "'s turn";
-			}
-			if(com.action == 'finishedturn'){
-				addChatMessage('System',com.name + " has finished their turn");
-				$("#playerstatus"+com.playerid).removeClass('turn');
-			}
-			if(com.action == 'waiting'){
+				break;
+			case 'action':
+				$('#playerstatus'+com.playerid).removeClass();
+				$('#playerstatus'+com.playerid).addClass('action');
+				break;
+			case 'buy':
+				$('#playerstatus'+com.playerid).removeClass();
+				$('#playerstatus'+com.playerid).addClass('buy');
+				break;
+			case 'waiting':  //waiting for other players
+				$('#playerstatus'+com.playerid).removeClass();
 				$('#playerstatus'+com.playerid).addClass('waiting');
-			}
-			if(com.action == 'donewaiting'){
-				$('#playerstatus'+com.playerid).removeClass('waiting');
+				break;
 			}
 			return;
 		}

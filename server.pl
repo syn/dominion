@@ -55,6 +55,7 @@ websocket '/' => sub {
 							#Tell everyone that you brought a card
 							Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p)->send_to_everyone_else($p);
 							send_hand($p);
+							Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game); 
 							server_tick($game);
 						}
 						
@@ -96,10 +97,10 @@ websocket '/' => sub {
 
 
 sub server_tick {
-	
 	my ($game) = @_;
 	print "Server Tick\n";
 	if ( $game->active_player ) {
+		
 	    my $state = $game->state;
 		print Dumper($state);
 	    given ( $state->{state} ) {
@@ -140,6 +141,10 @@ sub server_tick {
 	        }
 	        default { die "Can't deal with state: $state->{state}" }
 	    }
+	}
+	#send the current status of all the players out
+	foreach my $player ( $game->players ) {
+		Dominion::Com::Messages::PlayerStatus->new(action => $player->turnstate ,player=>$player)->send_to_everyone($game);
 	}
 }
 
