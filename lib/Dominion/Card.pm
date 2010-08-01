@@ -28,6 +28,17 @@ sub remove_from_current_set {
     $old->delete($index);
 }
 
+sub TO_JSON {
+	my ($self) = @_;
+	return {
+		name => $self->name,
+		type => $self->type,
+		cost_coin => $self->cost_coin,  
+		image => lc($self->name) .".jpg",
+		available => $self->count,
+	};
+}
+
 =head2 coin
 
 How much coin does this card give you by being in your hand? (Note that this
