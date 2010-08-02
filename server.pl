@@ -22,6 +22,7 @@ websocket '/' => sub {
 	#create a new player..
 	$playercount++; #Bump up the player count
 	my $player = Dominion::Player->new(name => 'Player' . $playercount, controller => $self);
+	$player->hand->add_listener('add',sub {print "hand changed\n";});
 	$game->player_add($player);
 	#Send Player connected message
 	player_connected($game,$player);
