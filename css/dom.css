@@ -171,6 +171,11 @@ img.card {
 	border-radius: 9px;
 	margin:5px;
 }
+#loader img {
+	border:2px solid grey;
+	border-radius: 20px;
+	
+}
 
 /*
 .card-Copper   		{background-image:url('../images/copper.jpg');}

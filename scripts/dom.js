@@ -513,11 +513,11 @@ function makesupplydraggable ( cards) {
 			j--;
 		}
 	}
-	$('#supplycards').children(".card").each(function(index,value) {
+	$('#supplycards').find(".card").each(function(index,value) {
 		$('#' + value.id).fadeTo('fast', 0.2);
 	});
 	for ( var i in newarr ) {
-		$('#supplycards').children(".card-"+newarr[i]).each(function(index,value) {
+		$('#supplycards').find(".card-"+newarr[i]).each(function(index,value) {
 			$('#' + value.id).draggable({helper: clonehelper});
 			$('#' + value.id).fadeTo('fast', 1);
 				

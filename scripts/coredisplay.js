@@ -13,9 +13,15 @@ function showhand() {
 			carddiv.setAttribute("class", "card card-"+hand[i].name);
 			carddiv.setAttribute("src", "./images/"+hand[i].image);
 			carddiv.setAttribute("cardnum",i);
-			document.getElementById('handcards').appendChild(carddiv);
+			//document.getElementById('handcards').appendChild(carddiv);
+			
+			var alink = document.createElement('a');
+			alink.setAttribute("href", "./images/"+hand[i].image);
+			document.getElementById('handcards').appendChild(alink);
+			alink.appendChild(carddiv);
 		}
 	}
+	$('#handcards a').flyout();
 }
 //Draw the supply
 //This function will nuke any draggable stuff setup and rerender the supply with updates to any depleted cards etc
@@ -42,7 +48,10 @@ function showsupply() {
 			carddiv.setAttribute("class", "card supply card-" + supply[i].name);
 			carddiv.setAttribute("cardnum",i);
 			carddiv.setAttribute("src", "./images/"+supply[i].image);
-			document.getElementById('supplycards').appendChild(carddiv);
+			var alink = document.createElement('a');
+			alink.setAttribute("href", "./images/"+supply[i].image);
+			document.getElementById('supplycards').appendChild(alink);
+			alink.appendChild(carddiv);
 		}
 		var countdiv = document.createElement('div');
 		countdiv.innerHTML=supply[i].available;
@@ -50,6 +59,7 @@ function showsupply() {
 		document.getElementById('supplycards').appendChild(countdiv);
 		
 	}
+	$('#supplycards a').flyout();
 }
 
 //Called when the supply is active and the player is able to drag cards out
@@ -119,11 +129,15 @@ function updateCardPlayed(playerid,card,actiontype,name) {
 	//
 	$(carddiv).width( $('#supplycard-Copper').width());
 	$(carddiv).height( $('#supplycard-Copper').height());
+	var alink = document.createElement('a');
+	alink.setAttribute("href", "./images/"+card.image);
 	
 	//Figure out if the last area was played for the same player for the same reason
 	if(lastPlayUpdate == "" + playerid + actiontype +actioncount && document.getElementById(lastPlayUpdate) != null) {
 		//append the card to  this div
-		$("#" + lastPlayUpdate).append(carddiv);
+		$("#" + lastPlayUpdate).append(alink);
+		alink.appendChild(carddiv);
+		
 	} else {
 		//create a new div and put the card in that.
 		lastPlayUpdate ="" + playerid + actiontype +actioncount;
@@ -155,9 +169,11 @@ function updateCardPlayed(playerid,card,actiontype,name) {
 			actiondiv.innerHTML = "<h4>" + name + " discarded.</h4>";
 			break;
 		}
-		actiondiv.appendChild(carddiv);
+		actiondiv.appendChild(alink);
+		alink.appendChild(carddiv);
 		document.getElementById('playedcards').appendChild(actiondiv);
 	}
+	$(alink).flyout();
 	prunePlayArea();
 	
 }
