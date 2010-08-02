@@ -102,24 +102,15 @@ sub summary {
         	$data{$card->name} = $card->new;
         }
     }
- 	return (values %data);
-    #my @arr;
-    #foreach my $key (keys %data) {
-    #	push(@arr,$data{$key});
-    #}
-    #return sort sortcards @arr;
+ 	return sort sortcards (values %data);
 }
-#Sorts the cards in the summary in order of
-#Curses
-#Treasure
-#Victory
-#Action
 sub sortcards {
-	#if( $a->group != $b->group) {
-	#	return $a->group <=> $b->group;
-	#}
-	return $a->cost_gold <=> $b->cost_gold;
+	if( $a->group != $b->group) {
+		return $a->group <=> $b->group;
+	}
+	return $a->cost_coin <=> $b->cost_coin;
 }
+
 sub TO_JSON {
 	my ($self) = @_;
 	my $data;

@@ -41,6 +41,23 @@ sub TO_JSON {
 	};
 }
 
+sub group {
+	my ($self) = @_;
+	if($self->is('curse')) {
+		return 1;
+	}
+	if($self->is('treasure')) {
+		return 2;
+	}
+	if($self->is('victory')) {
+		return 3;
+	}
+	if($self->is('action')) {
+		return 4;
+	}
+	return 5;
+}
+
 =head2 coin
 
 How much coin does this card give you by being in your hand? (Note that this
