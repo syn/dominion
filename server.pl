@@ -22,7 +22,7 @@ websocket '/' => sub {
 	#create a new player..
 	$playercount++; #Bump up the player count
 	my $player = Dominion::Player->new(name => 'Player' . $playercount, controller => $self);
-	$player->hand->add_listener('add',sub {print "hand changed\n";});
+	#$player->hand->add_listener('add',\&send_hand,$player);
 	$game->player_add($player);
 	#Send Player connected message
 	player_connected($game,$player);
@@ -122,7 +122,7 @@ sub server_tick {
 	        	#make sure they have the most recent hand
 	        	send_hand($game->active_player);
 	        	#Send a choice to the player 
-				my $choice = Dominion::Com::Messages::Choice->new(message => 'Start action phase');
+				my $choice = Dominion::Com::Messages::Choice->new(message => 'Action phase : actions = ' . $state->{actions} );
 				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishactionphase', name=>'Finish Action Phase Early');
 				#TODO only send the cards that can be played.
 				
@@ -135,7 +135,7 @@ sub server_tick {
 	        when ( 'buy' ) {
 	        	send_hand($game->active_player);
 	            #Send a choice to the player 
-				my $choice = Dominion::Com::Messages::Choice->new(message => 'Buy phase');
+				my $choice = Dominion::Com::Messages::Choice->new(message => 'Buy phase : buys = ' . $state->{buys} . ' , gold = ' . $state->{coin});
 				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishturn', name=>'Finish Buy Phase Early');
 					
 				my $option2 = Dominion::Com::Messages::Options::Buy->new(event => 'cardbrought',cards => [map { $_ } grep { $_->cost_coin <= $state->{coin} } $game->supply->cards]);
