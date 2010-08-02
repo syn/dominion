@@ -81,7 +81,7 @@ function init() {
 	// Receive message
 	ws.onmessage = function(e) {
 		// Write message
-		addChatMessage('Debug',e.data);
+		//addChatMessage('Debug',e.data);
 		var com = jQuery.parseJSON(e.data);
 		if (com.type == 'message') {
 			addChatMessage(com.from,com.message);
