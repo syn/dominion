@@ -81,8 +81,9 @@ function init() {
 	// Receive message
 	ws.onmessage = function(e) {
 		// Write message
-		//addChatMessage('Debug',e.data);
 		var com = jQuery.parseJSON(e.data);
+		console.log("Json recived  type:" + com.type + " -- " + e.data);
+		
 		if (com.type == 'message') {
 			addChatMessage(com.from,com.message);
 			return;
@@ -153,17 +154,22 @@ function init() {
 		}
 		if (com.type =='supply') {
 			//Setup the supply for the start of the game
-			supply = com.supply;
-			showsupply();
-			if(buys > 0) {
-				//We were in the middle of buy phase and we got sent an updated supply, setup the dragging again.
-				$('#supplycards').children(".card").each(function(index,value) {
-					if(gold >= supply[$('#' + value.id).attr("cardnum")].costgold && supply[$('#' + value.id).attr("cardnum")].available > 0) {
-						$('#' + value.id).draggable({helper: clonehelper});
-					} else {
-						$('#' + value.id).fadeTo('slow', 0.2);
-					}
-				});
+			if(supply == null) {
+				supply = com.supply;
+				shownewsupply();
+			} else {
+				supply = com.supply;
+				showsupply();
+				if(buys > 0) {
+					//We were in the middle of buy phase and we got sent an updated supply, setup the dragging again.
+					$('#supplycards').children(".card").each(function(index,value) {
+						if(gold >= supply[$('#' + value.id).attr("cardnum")].costgold && supply[$('#' + value.id).attr("cardnum")].available > 0) {
+							$('#' + value.id).draggable({helper: clonehelper});
+						} else {
+							$('#' + value.id).fadeTo('slow', 0.2);
+						}
+					});
+				}
 			}
 			return;
 		}
@@ -425,6 +431,7 @@ function init() {
 }
 
 function makehanddraggable (cards) {
+	console.log("Make Hand Draggable "  + cards);
 	var oldarr = new Array();
 	for ( var i in cards ) {
 		oldarr.push(cards[i].name);
@@ -440,8 +447,7 @@ function makehanddraggable (cards) {
 	}
 	var cardsdraggable = new Array();
 	for ( var i in newarr ) {
-		
-		$('#handcards').children(".card-"+newarr[i]).each(function(index,value) {
+		$('#handcards').find(".card-"+newarr[i]).each(function(index,value) {
 			//TODO only make the cards in the choice type draggable...
 			//For chapple that dosn't matter :D
 			
@@ -470,7 +476,7 @@ function makehanddraggable (cards) {
 		});
 	}
 	//Iterate over all the cards in the hand making those not dragable greyed out.
-	$('#handcards').children(".card").each(function(index,value) {
+	$('#handcards').find(".card").each(function(index,value) {
 		
 		if(cardsdraggable.indexOf($(this).attr('id'))==-1) {
 			$(this).fadeTo('slow', 0.2);
