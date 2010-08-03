@@ -23,9 +23,16 @@ websocket '/' => sub {
 	$playercount++; #Bump up the player count
 	my $player = Dominion::Player->new(name => 'Player' . $playercount, controller => $self);
 	
+	
+	
 	#add a listener that sends the player thier hand whenever they get a card
 	$player->hand->add_listener('add', sub {
         send_hand($player);
+    });
+    #add a listener that sends out the players state whenever it changes
+    $player->add_listener('turnstate', sub {
+    	my ($p,$turnstate) = @_;
+    	Dominion::Com::Messages::PlayerStatus->new(action => $turnstate ,player=>$p)->send_to_everyone($game);
     });
     
 	$game->player_add($player);
@@ -146,10 +153,6 @@ sub server_tick {
 	        }
 	        default { die "Can't deal with state: $state->{state}" }
 	    }
-	}
-	#send the current status of all the players out
-	foreach my $player ( $game->players ) {
-		Dominion::Com::Messages::PlayerStatus->new(action => $player->turnstate ,player=>$player)->send_to_everyone($game);
 	}
 }
 
