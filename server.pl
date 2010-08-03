@@ -16,6 +16,7 @@ my $clients     = {};  #List of all clients.
 my $game = Dominion::Game->new;
 my $playercount = 0; #The number of players we have seen so far, only used for sequential initial names
 
+$game->supply->add_listener('remove',sub {Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game);});
 websocket '/' => sub {
 	my $self = shift;
 	
@@ -55,7 +56,6 @@ websocket '/' => sub {
 							my $card = $game->active_player->buy($message->{'card'});
 							#Tell everyone that you brought a card
 							Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p)->send_to_everyone_else($p);
-							Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game); 
 							server_tick($game);
 						}
 						
