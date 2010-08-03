@@ -58,17 +58,20 @@ websocket '/' => sub {
 							#Tell everyone that you brought a card
 							Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p)->send_to_everyone_else($p);
 							server_tick($game);
+							return;
 						}
 						
 						when ('finishturn') {
 							my $p = $game->active_player;
 							$player->cleanup_phase;
 							server_tick($game);
+							return;
 						}
 						when ('finishactionphase') {
 							my $p = $game->active_player;
 							$player->buy_phase;
 							server_tick($game);
+							return;
 						}
 						when ('playcard') {
 							my $p = $game->active_player;
@@ -76,6 +79,7 @@ websocket '/' => sub {
 							#Tell everyone that you played a card
 							Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p)->send_to_everyone_else($p);
 							server_tick($game);
+							return;
 						}
 						default {print Dumper($message);}
 					}
@@ -88,6 +92,7 @@ websocket '/' => sub {
 	# Finished
 	$self->finished(
 		sub {
+			#TODO remove the player from the game
 			
 		}
 	);
