@@ -192,17 +192,9 @@ function init() {
 			showhand();
 			return;
 		}
-		if (com.type == 'startphasebuy') {
-			startbuyphase(com);
-			return;
-		}
 		if (com.type == 'cardplayed') { 
 			//Add the card to the play area to show everyone what was played.
 			updateCardPlayed(com.playerid,com.card,com.actiontype,com.name);
-			return;
-		}
-		if (com.type == 'startactionphase') {
-			startactionphase(com);
 			return;
 		}
 		if(com.type =='actionresolved') {
@@ -215,18 +207,6 @@ function init() {
 			} else {
 				//update the status
 				$("#playstatus").html("Action Phase : actions left = " + com.actions);
-			}
-			return;
-		}
-		if(com.type == 'attack') {
-			if(com.card == 'Witch') {
-				setupWitch();
-			}
-			if(com.card == 'Bureaucrat') {
-				setupBureaucrat();
-			}
-			if(com.card == 'Militia') {
-				setupMilitia();
 			}
 			return;
 		}
@@ -576,165 +556,6 @@ function removeClass(ele,cls) {
     	var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
 		ele.className=ele.className.replace(reg,' ');
 	}
-}
-
-function startbuyphase (com) {
-	supplyactive('buy');  //change the colour of the supply;
-	gold = com.gold;
-	buys = com.buys;
-	// UPdate status message with how much gold we have to spend and how many buys are left.
-	$("#playstatus").html("Buy phase : Buy = " + buys + ", Gold = " + gold);
-	//Add a button that lets a player buy nothing.
-	
-	var control = document.getElementById('control');
-	var skipbuy = document.createElement('div');
-	skipbuy.setAttribute("id", "skipBuyContainer");
-	skipbuy.innerHTML="<button type='button' id='finishbuy'>Finish Buy Phase Early</button>";
-	control.appendChild(skipbuy);
-	$('#finishbuy').click(function() {
-		//Remove finish Buy button
-		document.getElementById('control').removeChild(document.getElementById("skipBuyContainer"));
-		showsupply();
-		supplydeactivate();
-		$("#play").droppable("destroy" );
-		sendFinishTurn();
-	});
-	$('#supplycards').children(".card").each(function(index,value) {
-		if(gold >= supply[$('#' + value.id).attr("cardnum")].costgold && supply[$('#' + value.id).attr("cardnum")].available > 0) {
-			$('#' + value.id).draggable({helper: clonehelper});
-			$('#' + value.id).fadeTo('fast', 1);
-		} else {
-			$('#' + value.id).fadeTo('slow', 0.2);
-		}
-		//Figure out if it's sellable.
-		//value.draggable({helper:'clone'});
-	});
-	$("#play").droppable({
-        accept: '.card',
-        drop: function(event, ui) {
-                var c = $(ui.draggable).clone();
-                c.removeAttr("id");
-				//$("#playedcards").append(c);
-                c.removeClass("ui-draggable");
-                updateLocalCardPlayed(c,'cardbrought');
-                
-                //Send a message off that says we just brought a card.
-                var message = new buycard(supply[c.attr("cardnum")].name);
-            	var myJSONText = JSON.stringify(message);
-            	// Send message
-            	ws.send(myJSONText); 
-            	buys--;
-            	gold = gold - supply[c.attr("cardnum")].costgold;
-            	$("#playstatus").html("Buy phase : Buy = " + buys + ", Gold = " + gold);
-            	if(buys == 0 ) {
-            		//Cleanup the supply
-            		showsupply();
-            		supplydeactivate();
-            		//Send finished turn message
-            		document.getElementById('control').removeChild(document.getElementById("skipBuyContainer"));
-            		$("#play").droppable( "destroy" );
-            		sendFinishTurn();
-            		
-            	} else {
-            		//update the status with the buys and gold left..
-            		
-            		//Update the supply with the new dragable etc.
-            		$('#supplycards').children(".card").each(function(index,value) {
-        				//Get the id of the supply.
-        				if(gold >= supply[$('#' + value.id).attr("cardnum")].costgold) {
-        					//$('#' + value.id).draggable({helper:'clone'});
-        				} else {
-        					
-        					$('#' + value.id).draggable("disable");  //cant destroy here, this kills the current drag action!
-        					$('#' + value.id).fadeTo('slow', 0.2);
-        					
-        				}
-        				//Figure out if it's sellable.
-        				//value.draggable({helper:'clone'});
-        			});
-            		
-            	}
-        }
-    });
-	//<div id="trash" ondrop="drop(this, event)" ondragenter="return false" ondragover="return false"> 
-}
-function startactionphase(com) {
-	handactive('action');
-	//Add a button to allow players to skip the action phase if they want to.
-	$("#playstatus").html("Action Phase : actions left = " + com.actions);
-	var control = document.getElementById('control');
-	var skipaction = document.createElement('div');
-	skipaction.setAttribute("id", "skipActionContainer");
-	skipaction.innerHTML="<button type='button' id='finishbuy'>Finish Action Phase Early</button>";
-	control.appendChild(skipaction);
-	$('#finishbuy').click(function() {
-		//Remove finish Buy button
-		document.getElementById('control').removeChild(document.getElementById("skipActionContainer"));
-		$("#play").droppable( "destroy" );
-		handdeactivate();
-		preparehandforbuy();
-		sendFinishAction();
-	});
-	//Make all the action cards dragable
-	$('#handcards').children(".card").each(function(index,value) {
-		//Get the id of the supply.
-		//alert ($('#' + value.id).attr("cardnum"));
-		var type = hand[$('#' + value.id).attr("cardnum")].type;
-		if(type == 'Action' || type == 'Action/Attack' || type =='Action/Reaction' ) {
-			$('#' + value.id).draggable({ 
-		        revert: 'invalid', 
-		        scroll: false,
-		        helper: function(){ 
-					var c = $(this).clone();
-					c.width($(this).width());
-					c.height($(this).height());
-					c.attr('id','tempclonecard');
-					
-					return c;
-				},
-		        start : function() {
-		        	this.style.display="none";
-		        },
-		        stop: function() {
-		        	this.style.display="";
-		        }
-		    });
-		} else {					
-			$('#' + value.id).fadeTo('slow', 0.4);
-		}
-	});
-	//Now set the play area as droppable
-	$("#play").droppable({
-        accept: '.card', 
-        drop: function(event, ui) {
-                var card = $(ui.draggable);
-                //c.removeAttr("id");
-				//$("#playedcards").append(card);
-				
-				card.draggable("destroy");
-				card.attr('style','');  //Jquery seems to leave a bunch of relative references around after dragging with out the clone helper.
-            
-				updateLocalCardPlayed(card,'actionplayed');
-				//Remove the Finish Action Phase early button.
-				//Will put it back later if we need it, Don't want someone todo that while the action is being resolved.
-				document.getElementById('control').removeChild(document.getElementById("skipActionContainer"));
-				//Remove all the dragable stuff currently setup, it may interfer with resolving the action.
-				$('#handcards').children(".card").each(function(index,value) {
-					$('#' + value.id).draggable("destroy");
-				});
-				$("#play").droppable( "destroy" );
-				handdeactivate();
-                //Send a message off that says we just played a card.
-                var message = new playcard(hand[card.attr("cardnum")].name,card.attr("cardnum"));
-            	//replace the card with a filler
-                hand[card.attr("cardnum")]="played";
-                var myJSONText = JSON.stringify(message);
-            	// Send message
-            	ws.send(myJSONText);
-            	$("#tempclonecard").remove();
-		}
-	});
-	//$("#handcards").children(".card")
 }
 window.onload = init;
 
