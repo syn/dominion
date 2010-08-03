@@ -3,47 +3,14 @@ function nameupdate(parameter) {
 	this.type = "namechange";
 	this.name = parameter;
 }
-
-function buycard(parameter) {
-	this.type = "buycard";
-	this.card = parameter;
-}
-
-function playcard(parameter) {
-	this.type = "playcard";
-	this.card = parameter;
-}
 function choiceresponse(parameter,card) {
 	this.type = "choiceresponse";
 	this.event = parameter;
 	if(card) {this.card = card;}
 }
 
-
 function startgame() {
 	this.type = "startgame";
-}
-
-function finishturn() {
-	this.type = "finishturn";
-} 
-function finishactionphase () {
-	this.type = "finishactionphase";
-}
-function witchResolved(parameter) {
-	this.type = "witchResolved";
-	this.option = parameter;
-}
-
-function bureaucratResolved(parameter,vpcard) {
-	this.type = "bureaucratResolved";
-	this.option = parameter;
-	this.card = vpcard;
-}
-function militiaResolved(resolution,discards) {
-	this.type = "militiaResolved";
-	this.option = resolution;
-	this.card = discards;
 }
 
 if (WebSocket.__initialize) {
@@ -193,27 +160,9 @@ function init() {
 			gameover = true; 
 			return;
 		}
-		if (com.type == 'extracards') {
-			hand = hand.concat(com.cards);
-			showhand();
-			return;
-		}
 		if (com.type == 'cardplayed') { 
 			//Add the card to the play area to show everyone what was played.
 			updateCardPlayed(com.playerid,com.card,com.actiontype,com.name);
-			return;
-		}
-		if(com.type =='actionresolved') {
-			//see if there are any actions left
-			if(com.actions == 0) {
-				//Cleanup from the buy phase
-				//document.getElementById('control').removeChild(document.getElementById("skipActionContainer"));
-				//Remove the dragable stuff on the cards in the hand.
-				preparehandforbuy();
-			} else {
-				//update the status
-				$("#playstatus").html("Action Phase : actions left = " + com.actions);
-			}
 			return;
 		}
 		if(com.type == 'choice') {
@@ -537,18 +486,6 @@ function preparehandforbuy() {
 	});
 }
 
-function sendFinishTurn() {
-	var message = new finishturn();
-	var myJSONText = JSON.stringify(message);
-	ws.send(myJSONText);
-}
-
-function sendFinishAction () {
-	var message = new finishactionphase();
-	var myJSONText = JSON.stringify(message);
-	ws.send(myJSONText);
-
-}
 function hasClass(ele,cls) {
 	return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
 }
