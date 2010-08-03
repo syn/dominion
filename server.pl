@@ -16,7 +16,6 @@ my $clients     = {};  #List of all clients.
 my $game = Dominion::Game->new;
 my $playercount = 0; #The number of players we have seen so far, only used for sequential initial names
 
-$game->supply->add_listener('remove',sub {Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game);});
 websocket '/' => sub {
 	my $self = shift;
 	
@@ -47,6 +46,8 @@ websocket '/' => sub {
 					
 					#send the supply to all the players
 					Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game); 
+					#add a listener to send a new supply out to everyone if it changes
+					$game->supply->add_listener('remove',sub {Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game);});
 					server_tick($game);
 				}
 				when ('choiceresponse') {
