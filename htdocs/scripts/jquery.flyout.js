@@ -141,14 +141,21 @@ $.fn.extend({flyout : function(options) {
 			if (animating == true) { return false; }
 	
 			if (shown) { putAway(this); }
-			else { flyOut(this); }
+			else { 
+				
+				if($('#loader').size() == 0 ) {
+					flyOut(this);
+				} else {
+					$('#loader img').click();
+				}
+			}
 	
 			return false;
 		});
 		
 		var o = jQuery.extend({
-			outSpeed : 1000,
-			inSpeed : 500,
+			outSpeed : 500,
+			inSpeed : 250,
 			outEase : 'swing',
 			inEase : 'swing',
 			loadingSrc: null,
