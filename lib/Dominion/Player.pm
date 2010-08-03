@@ -13,7 +13,6 @@ has 'playarea'  => ( is => 'ro', isa => 'Dominion::Set', default => sub { Domini
 has 'deck'      => ( is => 'ro', isa => 'Dominion::Set', default => sub { Dominion::Set->new } );
 has 'discard'   => ( is => 'ro', isa => 'Dominion::Set', default => sub { Dominion::Set->new } );
 has 'game'      => ( is => 'rw', isa => 'Dominion::Game', default => undef );
-has 'controller'=> ( is => 'rw', isa => 'Mojolicious::Controller' , default => undef  ); 
 
 subtype 'TurnState'
   => as 'Str'
