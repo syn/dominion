@@ -22,10 +22,12 @@ websocket '/' => sub {
 	#create a new player..
 	$playercount++; #Bump up the player count
 	my $player = Dominion::Player->new(name => 'Player' . $playercount, controller => $self);
-	#$player->hand->add_listener('add',\&send_hand,$player);
+	
+	#add a listener that sends the player thier hand whenever they get a card
 	$player->hand->add_listener('add', sub {
         send_hand($player);
     });
+    
 	$game->player_add($player);
 	#Send Player connected message
 	player_connected($game,$player);
@@ -42,11 +44,6 @@ websocket '/' => sub {
 					#Send everyone a message telling them that game has started.
 					Dominion::Com::Messages::StartGame->new()->send_to_everyone($game);
 					
-					#Send everyone thier hand
-					#foreach my $player ( $game->players ) {
-						#send_hand($player);
-					#}
-					
 					#send the supply to all the players
 					Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game); 
 					server_tick($game);
@@ -58,7 +55,6 @@ websocket '/' => sub {
 							my $card = $game->active_player->buy($message->{'card'});
 							#Tell everyone that you brought a card
 							Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p)->send_to_everyone_else($p);
-							#send_hand($p);
 							Dominion::Com::Messages::Supply->new(supply => $game->supply)->send_to_everyone($game); 
 							server_tick($game);
 						}
@@ -66,13 +62,11 @@ websocket '/' => sub {
 						when ('finishturn') {
 							my $p = $game->active_player;
 							$player->cleanup_phase;
-							#send_hand($p);
 							server_tick($game);
 						}
 						when ('finishactionphase') {
 							my $p = $game->active_player;
 							$player->buy_phase;
-							#send_hand($p);
 							server_tick($game);
 						}
 						when ('playcard') {
@@ -80,7 +74,6 @@ websocket '/' => sub {
 							my $card = $game->active_player->play($message->{'card'});
 							#Tell everyone that you played a card
 							Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p)->send_to_everyone_else($p);
-							#send_hand($p);
 							server_tick($game);
 						}
 						default {print Dumper($message);}
@@ -122,8 +115,7 @@ sub server_tick {
 				Dominion::Com::Messages::EndGame->new(results => [@results])->send_to_everyone($game);
 	        }
 	        when ( 'action' ) {
-	        	#make sure they have the most recent hand
-	        	#send_hand($game->active_player);
+	        	
 	        	#Send a choice to the player 
 				my $choice = Dominion::Com::Messages::Choice->new(message => 'Action phase : actions = ' . $state->{actions} );
 				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishactionphase', name=>'Finish Action Phase Early');
@@ -136,7 +128,6 @@ sub server_tick {
 				$choice->send_to_player($game->active_player);
 	        }
 	        when ( 'buy' ) {
-	        	#send_hand($game->active_player);
 	            #Send a choice to the player 
 				my $choice = Dominion::Com::Messages::Choice->new(message => 'Buy phase : buys = ' . $state->{buys} . ' , gold = ' . $state->{coin});
 				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishturn', name=>'Finish Buy Phase Early');
