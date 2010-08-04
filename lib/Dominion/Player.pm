@@ -135,12 +135,12 @@ sub buy {
     $self->buys($self->buys - 1);
     $self->discard->add($card);
 
-    $self->cleanup_phase if $self->buys == 0;
+    $self->cleanup_phase(1) if $self->buys == 0;
     return $card;
 }
 
 sub cleanup_phase {
-    my ($self) = @_;
+    my ($self, $no_tick) = @_;
 
     # Put the playarea and hand cards onto the discard
     $self->discard->add($self->hand->cards);
@@ -155,6 +155,7 @@ sub cleanup_phase {
 
     $self->turnstate('waiting');
     $self->game->finished_turn($self);
+    $self->emit('tick') unless $no_tick;
 }
 
 sub draw {
@@ -165,6 +166,7 @@ sub draw {
     if ( @drawn < $count ) {
         $self->discard->shuffle;
         $self->deck->add($self->discard->cards);
+        $self->emit('shuffle');
         push @drawn, $self->deck->draw($count - @drawn);
     }
     return @drawn;
@@ -205,9 +207,9 @@ sub other_players {
 after qw(buy play) => sub {
     my ($self) = @_;
 
-    return unless $self->game;
+    $self->game->check_endgame if $self->game;
 
-    $self->game->check_endgame;
+    $self->emit('tick');
 };
 
 #__PACKAGE__->meta->make_immutable;
