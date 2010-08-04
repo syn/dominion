@@ -66,7 +66,9 @@ sub init {
     $kingdoms->shuffle;
     foreach my $kingdom ( $kingdoms->draw(10) ) {
         next unless $kingdom;
-        $self->add(map { (ref $kingdom)->new } 1..10);
+        #The rules say if the kingdom card is a victory card too, then we use the same number as there are provinces in the game
+        my $count = $kingdom->is('victory') ? $card_count_for{'Dominion::Cards::Province'} : 10;
+        $self->add(map { (ref $kingdom)->new } 1..$count);
     }
 
     my $initial_piles = $self->initial_piles({});
