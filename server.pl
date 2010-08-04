@@ -43,59 +43,72 @@ websocket '/' => sub {
 	# Receive message
 	$self->receive_message(
 		sub {
-			my ( $self, $rawmessage ) = @_;
-			my $message = decode_json($rawmessage);
-			given($message->{'type'}) {
-				when ('message')    {chat_message($game,$player,$message);}
-				when ('namechange') {name_change($player,$message->{'name'});}
-				when ('startgame')  {
-					#Send everyone a message telling them that game has started.
-					send_to_everyone(Dominion::Com::Messages::StartGame->new(),$game);
-					
-					$game->start;
-					
-					#send the supply to all the players
-					send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game); 
-					#add a listener to send a new supply out to everyone if it changes
-					$game->supply->add_listener('remove',sub {send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game);});
-					server_tick($game);
-				}
-				when ('choiceresponse') {
-					given($message->{'event'}) {
-						when ('cardbrought') {
-							my $p = $game->active_player; #have to save the active_player here, the buy function will change it on us
-							my $card = $game->active_player->buy($message->{'card'});
-							#Tell everyone that you brought a card
-							send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
-							server_tick($game);
-							return;
-						}
+			eval { 
+				
+				local $SIG{__DIE__} = sub { 
+					my ($error) = @_;
+					send_to_everyone(Dominion::Com::Messages::Chat->new(message => 'ERROR processing ' . $player->name . ' : ' . $error, from => 'Server'),$game);
+		      		#Do a Server tick to try and keep things moving along
+		      		server_tick($game);
+		    	};
+				my ( $self, $rawmessage ) = @_;
+				my $message = decode_json($rawmessage);
+				given($message->{'type'}) {
+					when ('message')    {chat_message($game,$player,$message);}
+					when ('namechange') {name_change($player,$message->{'name'});}
+					when ('startgame')  {
+						#Send everyone a message telling them that game has started.
+						send_to_everyone(Dominion::Com::Messages::StartGame->new(),$game);
 						
-						when ('finishturn') {
-							my $p = $game->active_player;
-							$player->cleanup_phase;
-							server_tick($game);
-							return;
-						}
-						when ('finishactionphase') {
-							my $p = $game->active_player;
-							$player->buy_phase;
-							server_tick($game);
-							return;
-						}
-						when ('playcard') {
-							my $p = $game->active_player;
-							my $card = $game->active_player->play($message->{'card'});
-							#Tell everyone that you played a card
-							send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
-							server_tick($game);
-							return;
-						}
-						default {print Dumper($message);}
+						$game->start;
+						
+						#send the supply to all the players
+						send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game); 
+						#add a listener to send a new supply out to everyone if it changes
+						$game->supply->add_listener('remove',sub {send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game);});
+						server_tick($game);
 					}
+					when ('choiceresponse') {
+						given($message->{'event'}) {
+							when ('cardbrought') {
+								my $p = $game->active_player; #have to save the active_player here, the buy function will change it on us
+								my $card = $game->active_player->buy($message->{'card'});
+								#Tell everyone that you brought a card
+								send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
+								server_tick($game);
+								return;
+							}
+							
+							when ('finishturn') {
+								my $p = $game->active_player;
+								$player->cleanup_phase;
+								server_tick($game);
+								return;
+							}
+							when ('finishactionphase') {
+								my $p = $game->active_player;
+								$player->buy_phase;
+								server_tick($game);
+								return;
+							}
+							when ('playcard') {
+								my $p = $game->active_player;
+								my $card = $game->active_player->play($message->{'card'});
+								#Tell everyone that you played a card
+								send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
+								server_tick($game);
+								return;
+							}
+							default {print Dumper($message);}
+						}
+					}			
+					default {print Dumper($message);}
 				}			
-				default {print Dumper($message);}
-			}			
+			
+				if ( $@ ) {
+					print "ERROR";
+				}
+			}
 		}
 	);
 		
