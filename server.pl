@@ -35,7 +35,33 @@ $game->add_listener('gameover', sub {
 });
 
 
+my $bot1 = Dominion::Player->new(name => 'Half Retard');
+my $bot2 = Dominion::Player->new(name => 'Full Retard');
+$game->player_add($bot1);
+$game->player_add($bot2);
 
+use Dominion::AI::FullRetard;
+use Dominion::AI::HalfRetard;
+Dominion::AI::HalfRetard->new(player => $bot1);
+Dominion::AI::FullRetard->new(player => $bot2);
+
+$bot1->add_listener('broughtcard', sub {
+    my ($p, $card) = @_;
+    send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
+});
+$bot1->add_listener('playedcard', sub {
+	my ($p, $card) = @_;
+   	send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
+});				
+
+$bot2->add_listener('broughtcard', sub {
+    my ($p, $card) = @_;
+    send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
+});
+$bot2->add_listener('playedcard', sub {
+	my ($p, $card) = @_;
+   	send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
+});	
 
 websocket '/' => sub {
 	my $self = shift;
@@ -57,6 +83,16 @@ websocket '/' => sub {
     	my ($p,$turnstate) = @_;
     	send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => $turnstate ,player=>$p),$game);
     });
+  
+    $player->add_listener('broughtcard', sub {
+    	my ($p, $card) = @_;
+    	send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
+    });
+    $player->add_listener('playedcard', sub {
+    	my ($p, $card) = @_;
+    	send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
+    });					
+    
     $game->supply->add_listener('newsupply',sub {
     	send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game); 
     });
@@ -97,9 +133,6 @@ websocket '/' => sub {
 							when ('cardbrought') {
 								my $p = $game->active_player; #have to save the active_player here, the buy function will change it on us
 								my $card = $game->active_player->buy($message->{'card'});
-								#Tell everyone that you brought a card
-								send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
-								
 								return;
 							}
 							
@@ -117,9 +150,6 @@ websocket '/' => sub {
 							when ('playcard') {
 								my $p = $game->active_player;
 								my $card = $game->active_player->play($message->{'card'});
-								#Tell everyone that you played a card
-								send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
-								
 								return;
 							}
 							default {print Dumper($message);}
@@ -127,10 +157,6 @@ websocket '/' => sub {
 					}			
 					default {print Dumper($message);}
 				}			
-			
-				if ( $@ ) {
-					print "ERROR";
-				}
 			}
 		}
 	);
@@ -188,7 +214,7 @@ sub send_to_player {
 sub send_to_everyone {
 	my ($message, $game) = @_;
 	my $json = JSON->new->utf8;
-	foreach my $player ( $game->players ) {
+	foreach my $player (keys %$clients ) {
 		$clients->{$player}{controller}->send_message( $json->convert_blessed->encode($message) );
 	}
 }
@@ -196,8 +222,8 @@ sub send_to_everyone {
 sub send_to_everyone_else {
 	my ($message, $player) = @_;
 	my $json = JSON->new->utf8;
-	foreach my $otherplayer ( $player->game->players ) {
-		if($player != $otherplayer) {
+	foreach my $otherplayer ( keys %$clients ) {
+		if($player ne $otherplayer) {
 			$clients->{$otherplayer}{controller}->send_message( $json->convert_blessed->encode($message) );
 		}
 	}

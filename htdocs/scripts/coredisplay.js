@@ -145,8 +145,15 @@ function updateCardPlayed(playerid,card,actiontype,name) {
 	//alert($('#supplycard-Copper').width());
 	//TODO problem here.
 	//
-	$(carddiv).width( $('#supplycard-Copper').width());
-	$(carddiv).height( $('#supplycard-Copper').height());
+	if($('#supplycard-Copper').width() == 0) {
+		$(carddiv).oneTime(2000, function() {
+			$(this).width( $('#supplycard-Copper').width());
+			$(this).height( $('#supplycard-Copper').height());
+		});
+	} else {
+		$(carddiv).width( $('#supplycard-Copper').width());
+		$(carddiv).height( $('#supplycard-Copper').height());
+	}
 	var alink = document.createElement('a');
 	alink.setAttribute("href", "./images/"+card.image);
 	

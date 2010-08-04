@@ -103,7 +103,7 @@ sub play {
     $self->playarea->add($card);
     $self->actions($self->actions - 1);
     $card->action($self, $self->game);
-
+	$self->emit('playedcard',$card);
     $self->buy_phase if $self->actions == 0 or $self->hand->grep(sub { $_->is('action') }) == 0;
     return $card;
 }
@@ -134,7 +134,9 @@ sub buy {
     $self->potion_sub($card->cost_potion);
     $self->buys($self->buys - 1);
     $self->discard->add($card);
-
+	
+	$self->emit('broughtcard',$card);
+	 
     $self->cleanup_phase(1) if $self->buys == 0;
     return $card;
 }

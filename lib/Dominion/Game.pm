@@ -56,6 +56,8 @@ sub start {
         $player->actions(1);
         $player->buys(1);
         $player->coin(0);
+        #Not sure if this is the right thing todo here
+        $player->remove_all_listeners('tick');
         $player->add_listener('tick', sub { $self->player_ticked(shift) });
     }
 
