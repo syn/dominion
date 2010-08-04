@@ -32,28 +32,17 @@ function shownewsupply() {
 	//We get an array of cards, lets display them
 	for ( var i in supply )
 	{
-		if(supply[i].available <= 0) {
-			//we Have Run out of this card...
-			//Show an empty card instead.
-			var carddiv = document.createElement('img');
-			carddiv.setAttribute("id", "supplycard-" + supply[i].name);
-			carddiv.setAttribute("class", "card supply card-empty");
-			carddiv.setAttribute("cardnum",i);
-			carddiv.setAttribute("cardname",supply[i].name);
-			carddiv.setAttribute("src", "./images/empty.jpg");
-			document.getElementById('supplycards').appendChild(carddiv);
-		} else {
-			var carddiv = document.createElement('img');
-			carddiv.setAttribute("id", "supplycard-" + supply[i].name);
-			carddiv.setAttribute("class", "card supply card-" + supply[i].name);
-			carddiv.setAttribute("cardnum",i);
-			carddiv.setAttribute("cardname",supply[i].name);
-			carddiv.setAttribute("src", "./images/"+supply[i].image);
-			var alink = document.createElement('a');
-			alink.setAttribute("href", "./images/"+supply[i].image);
-			document.getElementById('supplycards').appendChild(alink);
-			alink.appendChild(carddiv);
-		}
+		
+		var carddiv = document.createElement('img');
+		carddiv.setAttribute("id", "supplycard-" + supply[i].name);
+		carddiv.setAttribute("class", "card supply card-" + supply[i].name);
+		carddiv.setAttribute("data-cardname",supply[i].name);
+		carddiv.setAttribute("src", "./images/"+supply[i].image);
+		var alink = document.createElement('a');
+		alink.setAttribute("href", "./images/"+supply[i].image);
+		document.getElementById('supplycards').appendChild(alink);
+		alink.appendChild(carddiv);
+		
 		var countdiv = document.createElement('div');
 		countdiv.innerHTML=supply[i].available;
 		countdiv.setAttribute("class", "cardcount");
@@ -77,7 +66,7 @@ function showsupply() {
 		var found = -1;
 		for ( var i in supply )
 		{
-			if(supply[i].name == $(value).attr('cardname')) {
+			if(supply[i].name == $(value).attr('data-cardname')) {
 				found = i;
 			}
 		}
@@ -87,8 +76,7 @@ function showsupply() {
 		} else {
 			//The card wasn't found, must have been removed from the supply
 			$(value).attr('src','./images/empty.jpg');
-			$(value).attr("cardnum",-1);
-			$(value).next().html(0);
+			$(value).parent().next().html(0);
 		}
 	});
 	$('#supplycards a').flyout();

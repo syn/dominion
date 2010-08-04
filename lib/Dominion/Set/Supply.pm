@@ -66,7 +66,7 @@ sub init {
     $kingdoms->shuffle;
     foreach my $kingdom ( $kingdoms->draw(10) ) {
         next unless $kingdom;
-        $self->add(map { (ref $kingdom)->new } 1..10);
+        $self->add(map { (ref $kingdom)->new } 1..2);
     }
 
     my $initial_piles = $self->initial_piles({});

@@ -24,9 +24,11 @@ websocket '/' => sub {
 	my $player = Dominion::Player->new(name => 'Player' . $playercount);
 	$clients->{$player}{controller} = $self;
 	
-	
-	#add a listener that sends the player thier hand whenever they get a card
+	#add a listener that sends the player their hand whenever they get a card
 	$player->hand->add_listener('add', sub {
+        send_hand($player);
+    });
+    $player->hand->add_listener('remove', sub {
         send_hand($player);
     });
     #add a listener that sends out the players state whenever it changes
@@ -47,9 +49,10 @@ websocket '/' => sub {
 				when ('message')    {chat_message($game,$player,$message);}
 				when ('namechange') {name_change($player,$message->{'name'});}
 				when ('startgame')  {
-					$game->start;
 					#Send everyone a message telling them that game has started.
 					send_to_everyone(Dominion::Com::Messages::StartGame->new(),$game);
+					
+					$game->start;
 					
 					#send the supply to all the players
 					send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game); 
@@ -126,6 +129,8 @@ sub server_tick {
 					push (@results , $res);
 				}
 				send_to_everyone(Dominion::Com::Messages::EndGame->new(results => [@results]),$game);
+				#Remove any supply listener updates that have been added, so we don't spam clients if the game is restarted and the supply is cleared.
+				$game->supply->remove_all_listeners('remove');
 	        }
 	        when ( 'action' ) {
 	        	

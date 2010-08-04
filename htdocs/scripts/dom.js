@@ -68,16 +68,7 @@ function init() {
 				display.innerHTML = com.name;
 			}
 			if(com.gamestatus == 'pregame') {
-				//DO some stuff like add a start game button
-				var control = document.getElementById('control');
-				var startbutton = document.createElement('div');
-				startbutton.setAttribute("id", "startcontainer");
-				startbutton.innerHTML="<button type='button' id='startgame'>Start Game!</button>";
-				control.appendChild(startbutton);
-				$('#startgame').click(function() {
-					var message = new startgame();
-					ws.send(JSON.stringify(message));
-				});
+				addStartButton();
 			}
 			return;
 		}
@@ -114,29 +105,25 @@ function init() {
 		}
 		
 		if (com.type == 'startgame') {
+			$('#supply').html('<div class="info"><h2>Supply</h2></div><div id="supplycards"></div>');
+			$('#hand').html('<div class="info"><h2>Hand</h2></div><div id="handcards"></div>');
+			$('#playedcards').html('');
 			 //Remove the startgame button
 			document.getElementById('control').removeChild(document.getElementById("startcontainer"));
 			addChatMessage('System',"The game has started.");
+			gameover = false;
 			return;
 		}
 		if (com.type =='supply') {
 			//Setup the supply for the start of the game
 			if(supply == null) {
+				console.log("Supply is null, showing a new supply");
 				supply = com.supply;
 				shownewsupply();
 			} else {
+				console.log("Supply update");
 				supply = com.supply;
 				showsupply();
-				if(buys > 0) {
-					//We were in the middle of buy phase and we got sent an updated supply, setup the dragging again.
-					$('#supplycards').children(".card").each(function(index,value) {
-						if(gold >= supply[$('#' + value.id).attr("cardnum")].costgold && supply[$('#' + value.id).attr("cardnum")].available > 0) {
-							$('#' + value.id).draggable({helper: clonehelper});
-						} else {
-							$('#' + value.id).fadeTo('slow', 0.2);
-						}
-					});
-				}
 			}
 			return;
 		}
@@ -158,6 +145,10 @@ function init() {
 				$('#supply').append(resultp);
 			}
 			gameover = true; 
+			console.log('setting supply to null');
+			supply = null;
+			addStartButton();
+			
 			return;
 		}
 		if (com.type == 'cardplayed') { 
@@ -314,10 +305,8 @@ function init() {
 								supplydeactivate();
 								
 				                //Send a message off that says we just played a card.
-								//TODO make the name of the event get carried over
-								var message = new choiceresponse(buyevent,supply[card.attr("cardnum")].name);
-				            								
-				                ws.send(JSON.stringify(message,supply[card.attr("cardnum")].name));
+								var message = new choiceresponse(buyevent,card.attr("data-cardname"));
+				                ws.send(JSON.stringify(message));
 				            	$("#tempclonecard").remove();
 				            	if( endbutton != null && endbutton != "") {
 				            		$('#' + endbutton).remove();
@@ -499,6 +488,19 @@ function removeClass(ele,cls) {
     	var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
 		ele.className=ele.className.replace(reg,' ');
 	}
+}
+
+function addStartButton() {
+	//DO some stuff like add a start game button
+	var control = document.getElementById('control');
+	var startbutton = document.createElement('div');
+	startbutton.setAttribute("id", "startcontainer");
+	startbutton.innerHTML="<button type='button' id='startgame'>Start Game!</button>";
+	control.appendChild(startbutton);
+	$('#startgame').click(function() {
+		var message = new startgame();
+		ws.send(JSON.stringify(message));
+	});
 }
 window.onload = init;
 
