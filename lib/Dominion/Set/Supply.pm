@@ -4,6 +4,7 @@ use 5.010;
 
 use Moose;
 extends 'Dominion::Set';
+with 'Dominion::EventEmitter';
 
 use List::MoreUtils qw(uniq);
 
@@ -76,6 +77,7 @@ sub init {
         $initial_piles->{$card->name} //= 0;
         $initial_piles->{$card->name}++;
     }
+    $self->emit('newsupply');
 }
 
 sub current_piles {

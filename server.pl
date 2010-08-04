@@ -11,10 +11,31 @@ use Data::Dumper;
 use Dominion::Game;
 use Dominion::Com::Messages;
 
+use Dominion::Human;
 
 my $clients     = {};  #List of all clients.
 my $game = Dominion::Game->new;
 my $playercount = 0; #The number of players we have seen so far, only used for sequential initial names
+
+$game->add_listener('gameover', sub {
+   
+    my @results;
+	foreach my $player ( $game->players ) {
+		my $vp = $player->deck->total_victory_points;
+		my $res = {	name   =>  $player->name, vp => $vp };
+		foreach my $card ( $player->deck->cards ) {
+	    	next unless $card->is('victory') or $card->is('curse');
+	        $res->{$card->name}++;
+        }
+		push (@results , $res);
+	}
+	send_to_everyone(Dominion::Com::Messages::EndGame->new(results => [@results]),$game);
+	#Remove any supply listener updates that have been added, so we don't spam clients if the game is restarted and the supply is cleared.
+	$game->supply->remove_all_listeners('remove');
+});
+
+
+
 
 websocket '/' => sub {
 	my $self = shift;
@@ -36,6 +57,11 @@ websocket '/' => sub {
     	my ($p,$turnstate) = @_;
     	send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => $turnstate ,player=>$p),$game);
     });
+    $game->supply->add_listener('newsupply',sub {
+    	send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game); 
+    });
+    
+    Dominion::Human->new(player => $player,controller => $self);
     
 	$game->player_add($player);
 	#Send Player connected message
@@ -49,7 +75,7 @@ websocket '/' => sub {
 					my ($error) = @_;
 					send_to_everyone(Dominion::Com::Messages::Chat->new(message => 'ERROR processing ' . $player->name . ' : ' . $error, from => 'Server'),$game);
 		      		#Do a Server tick to try and keep things moving along
-		      		server_tick($game);
+		      		
 		    	};
 				my ( $self, $rawmessage ) = @_;
 				my $message = decode_json($rawmessage);
@@ -62,11 +88,9 @@ websocket '/' => sub {
 						
 						$game->start;
 						
-						#send the supply to all the players
-						send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game); 
 						#add a listener to send a new supply out to everyone if it changes
 						$game->supply->add_listener('remove',sub {send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game);});
-						server_tick($game);
+						
 					}
 					when ('choiceresponse') {
 						given($message->{'event'}) {
@@ -75,20 +99,19 @@ websocket '/' => sub {
 								my $card = $game->active_player->buy($message->{'card'});
 								#Tell everyone that you brought a card
 								send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
-								server_tick($game);
+								
 								return;
 							}
 							
 							when ('finishturn') {
 								my $p = $game->active_player;
 								$player->cleanup_phase;
-								server_tick($game);
+								
 								return;
 							}
 							when ('finishactionphase') {
 								my $p = $game->active_player;
 								$player->buy_phase;
-								server_tick($game);
 								return;
 							}
 							when ('playcard') {
@@ -96,7 +119,7 @@ websocket '/' => sub {
 								my $card = $game->active_player->play($message->{'card'});
 								#Tell everyone that you played a card
 								send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
-								server_tick($game);
+								
 								return;
 							}
 							default {print Dumper($message);}
@@ -121,58 +144,6 @@ websocket '/' => sub {
 	);
 };
 
-
-sub server_tick {
-	my ($game) = @_;
-	print "Server Tick\n";
-	if ( $game->active_player ) {
-		
-	    my $state = $game->state;
-		print Dumper($state);
-	    given ( $state->{state} ) {
-	        when ( 'gameover' ) {
-	            my @results;
-	            foreach my $player ( $game->players ) {
-					my $vp = $player->deck->total_victory_points;
-					my $res = {	name   =>  $player->name, vp => $vp };
-					foreach my $card ( $player->deck->cards ) {
-	                    next unless $card->is('victory');
-	                    $res->{$card->name}++;
-                	}
-					push (@results , $res);
-				}
-				send_to_everyone(Dominion::Com::Messages::EndGame->new(results => [@results]),$game);
-				#Remove any supply listener updates that have been added, so we don't spam clients if the game is restarted and the supply is cleared.
-				$game->supply->remove_all_listeners('remove');
-	        }
-	        when ( 'action' ) {
-	        	
-	        	#Send a choice to the player 
-				my $choice = Dominion::Com::Messages::Choice->new(message => 'Action phase : actions = ' . $state->{actions} );
-				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishactionphase', name=>'Finish Action Phase Early');
-				#TODO only send the cards that can be played.
-				
-				my $option2 = Dominion::Com::Messages::Options::Play->new(event => 'playcard',cards => [$game->active_player->hand->cards_of_type('action')]);
-				
-				$choice->add($option1);
-				$choice->add($option2);
-				send_to_player($choice,$game->active_player);
-	        }
-	        when ( 'buy' ) {
-	            #Send a choice to the player 
-				my $choice = Dominion::Com::Messages::Choice->new(message => 'Buy phase : buys = ' . $state->{buys} . ' , gold = ' . $state->{coin});
-				my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'finishturn', name=>'Finish Buy Phase Early');
-					
-				my $option2 = Dominion::Com::Messages::Options::Buy->new(event => 'cardbrought',cards => [map { $_ } grep { $_->cost_coin <= $state->{coin} } $game->supply->cards]);
-			
-				$choice->add($option1);
-				$choice->add($option2);
-				send_to_player($choice,$game->active_player);
-	        }
-	        default { die "Can't deal with state: $state->{state}" }
-	    }
-	}
-}
 
 
 sub player_connected {
