@@ -26,6 +26,7 @@ has 'turnstate' => (
     default => 'waiting',
     trigger => sub {
         my ($self, $state) = @_;
+        print "State change for " . $self->name . " to $state\n";
         $self->emit('turnstate', $state);
     }
 );
@@ -105,12 +106,11 @@ sub play {
     $card->action($self, $self->game);
 	$self->emit('playedcard',$card);
     $self->buy_phase if $self->actions == 0 or $self->hand->grep(sub { $_->is('action') }) == 0;
-    return $card;
 }
 
 sub buy_phase {
     my ($self) = @_;
-
+	print "Starting buy phase for " . $self->name . "\n";
     $self->turnstate('buy');
     $self->coin_add($self->hand->total_coin);
 }
@@ -138,7 +138,6 @@ sub buy {
 	$self->emit('broughtcard',$card);
 	 
     $self->cleanup_phase(1) if $self->buys == 0;
-    return $card;
 }
 
 sub cleanup_phase {
