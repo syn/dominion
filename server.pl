@@ -143,8 +143,9 @@ websocket '/' => sub {
 								return;
 							}
 							when ('finishactionphase') {
-								my $p = $game->active_player;
-								$player->buy_phase;
+								print "$player->name finishactionphase\n";
+								$game->active_player->buy_phase;
+								$game->active_player->emit('tick');
 								return;
 							}
 							when ('playcard') {
