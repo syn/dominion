@@ -11,9 +11,8 @@ use Data::Dumper;
 use Dominion::Game;
 use Dominion::Com::Messages;
 
-use Dominion::Human;
+use Dominion::Controller::Human;
 
-my $clients     = {};  #List of all clients.
 my $game = Dominion::Game->new;
 my $playercount = 0; #The number of players we have seen so far, only used for sequential initial names
 
@@ -40,10 +39,10 @@ my $bot2 = Dominion::Player->new(name => 'Full Retard');
 $game->player_add($bot1);
 $game->player_add($bot2);
 
-use Dominion::AI::FullRetard;
-use Dominion::AI::HalfRetard;
-Dominion::AI::HalfRetard->new(player => $bot1);
-Dominion::AI::FullRetard->new(player => $bot2);
+use Dominion::Controller::AI::FullRetard;
+use Dominion::Controller::AI::HalfRetard;
+Dominion::Controller::AI::HalfRetard->new(player => $bot1);
+Dominion::Controller::AI::FullRetard->new(player => $bot2);
 
 $bot1->add_listener('broughtcard', sub {
     my ($p, $card) = @_;
@@ -64,46 +63,27 @@ $bot2->add_listener('playedcard', sub {
 });	
 
 websocket '/' => sub {
-	my $self = shift;
+	my $websocketController = shift;
 	
 	#create a new player..
 	$playercount++; #Bump up the player count
 	my $player = Dominion::Player->new(name => 'Player' . $playercount);
-	$clients->{$player}{controller} = $self;
+	$player->add_listener('sendmessage',  sub {
+		my($player,$message) = @_;	
+		my $json = JSON->new->utf8;
+		$websocketController->send_message( $json->convert_blessed->encode($message) );
+	});
+    
+    $game->player_add($player);
+    Dominion::Controller::Human->new(player => $player);
+    
 	
-	#add a listener that sends the player their hand whenever they get a card
-	$player->hand->add_listener('add', sub {
-        send_hand($player);
-    });
-    $player->hand->add_listener('remove', sub {
-        send_hand($player);
-    });
-    #add a listener that sends out the players state whenever it changes
-    $player->add_listener('turnstate', sub {
-    	my ($p,$turnstate) = @_;
-    	send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => $turnstate ,player=>$p),$game);
-    });
-  
-    $player->add_listener('broughtcard', sub {
-    	my ($p, $card) = @_;
-    	send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
-    });
-    $player->add_listener('playedcard', sub {
-    	my ($p, $card) = @_;
-    	send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
-    });					
-    
-    $game->supply->add_listener('newsupply',sub {
-    	send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game); 
-    });
-    
-    Dominion::Human->new(player => $player,controller => $self);
-    
-	$game->player_add($player);
-	#Send Player connected message
+	#Send Player connected message 
+	#TODO make this an event
 	player_connected($game,$player);
+	
 	# Receive message
-	$self->receive_message(
+	$websocketController->receive_message(
 		sub {
 			eval { 
 				
@@ -116,41 +96,36 @@ websocket '/' => sub {
 				my ( $self, $rawmessage ) = @_;
 				my $message = decode_json($rawmessage);
 				given($message->{'type'}) {
-					when ('message')    {chat_message($game,$player,$message);}
+					when ('message')    {chat_message($player->game,$player,$message);}
 					when ('namechange') {name_change($player,$message->{'name'});}
 					when ('startgame')  {
 						#Send everyone a message telling them that game has started.
-						send_to_everyone(Dominion::Com::Messages::StartGame->new(),$game);
+						send_to_everyone(Dominion::Com::Messages::StartGame->new(),$player->game);
 						
-						$game->start;
+						$player->game->start;
 						
 						#add a listener to send a new supply out to everyone if it changes
-						$game->supply->add_listener('remove',sub {send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$game);});
+						$game->supply->add_listener('remove',sub {send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$player->game);});
 						
 					}
 					when ('choiceresponse') {
 						given($message->{'event'}) {
 							when ('cardbrought') {
-								my $p = $game->active_player; #have to save the active_player here, the buy function will change it on us
-								my $card = $game->active_player->buy($message->{'card'});
+								$player->buy($message->{'card'});
 								return;
 							}
 							
 							when ('finishturn') {
-								my $p = $game->active_player;
 								$player->cleanup_phase;
-								
 								return;
 							}
 							when ('finishactionphase') {
-								print "$player->name finishactionphase\n";
-								$game->active_player->buy_phase;
-								$game->active_player->emit('tick');
+								$player->buy_phase;
+								$player->emit('tick');
 								return;
 							}
 							when ('playcard') {
-								my $p = $game->active_player;
-								my $card = $game->active_player->play($message->{'card'});
+								$player->play($message->{'card'});
 								return;
 							}
 							default {print Dumper($message);}
@@ -163,7 +138,7 @@ websocket '/' => sub {
 	);
 		
 	# Finished
-	$self->finished(
+	$websocketController->finished(
 		sub {
 			#TODO remove the player from the game
 			
@@ -174,25 +149,22 @@ websocket '/' => sub {
 
 
 sub player_connected {
-	my ($game,$p) = @_;
+	my ($game,$player) = @_;
 
 	#Send some game state.
-	send_to_player(Dominion::Com::Messages::InitialSetup->new(gamestatus => $game->state->{'state'} , name => $p->name),$p);
+	$player->emit('sendmessage',Dominion::Com::Messages::InitialSetup->new(gamestatus => $game->state->{'state'} , name => $player->name));
     
 	#Send everyone else a message that the player joined the game.
-	send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$p),$game);
+	send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$player),$player->game);
 	#Send this player a message about everyone else who is in the game
-	 foreach my $player ( $game->players ) {
-     	if($player!=$p) {
-     		send_to_player(Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$player),$p);
+	 foreach my $otherplayer ( $player->game->players ) {
+     	if($player!=$otherplayer) {
+     		$player->emit('sendmessage',Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$otherplayer));
      	}
     }
 }
 
-sub send_hand {
-	my ($player) = @_;	
-	send_to_player(Dominion::Com::Messages::Hand->new(cards => $player->hand),$player);
-}
+
 sub chat_message {
 	my ($game,$p,$incomingmessag) = @_;
 	send_to_everyone(Dominion::Com::Messages::Chat->new(message => $incomingmessag->{'message'} , from => $p->name),$game);
@@ -201,31 +173,24 @@ sub chat_message {
 sub name_change {
 	my ($player, $n) = @_;
 	$player->name($n);
-	
 	#TODO, set a playerID
 	send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'namechange' ,  player => $player),$game); 
 }
 
 
-sub send_to_player {
-	my ($message, $player) = @_;
-	my $json = JSON->new->utf8;
-	$clients->{$player}{controller}->send_message( $json->convert_blessed->encode($message) );
-}
+
 sub send_to_everyone {
 	my ($message, $game) = @_;
-	my $json = JSON->new->utf8;
-	foreach my $player (keys %$clients ) {
-		$clients->{$player}{controller}->send_message( $json->convert_blessed->encode($message) );
+	foreach my $player ($game->players) {
+		$player->emit('sendmessage',$message);
 	}
 }
 
 sub send_to_everyone_else {
 	my ($message, $player) = @_;
-	my $json = JSON->new->utf8;
-	foreach my $otherplayer ( keys %$clients ) {
+	foreach my $otherplayer ( $player->game->players ) {
 		if($player ne $otherplayer) {
-			$clients->{$otherplayer}{controller}->send_message( $json->convert_blessed->encode($message) );
+			$otherplayer->emit('sendmessage'.$message);
 		}
 	}
 }

@@ -4,5 +4,7 @@
   <includepathentry path="${resource_loc:/dominion/lib/Dominion/Cards}" />
   <includepathentry path="${resource_loc:/dominion/lib/Dominion}" />
   <includepathentry path="${resource_loc:/dominion/lib/Dominion/Set}" />
+  <includepathentry path="${resource_loc:/dominion/lib/Dominion/Controller/AI}" />
+  <includepathentry path="${resource_loc:/dominion/lib/Dominion/Controller}" />
 </includepath>
 

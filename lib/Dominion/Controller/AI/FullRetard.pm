@@ -1,9 +1,9 @@
-package Dominion::AI::FullRetard;
+package Dominion::Controller::AI::FullRetard;
 
 use Moose;
 no warnings 'recursion';
 
-extends 'Dominion::AI';
+extends 'Dominion::Controller';
 
 sub action {
     my ($self, $player, $state) = @_;

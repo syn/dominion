@@ -1,4 +1,4 @@
-package Dominion::AI;
+package Dominion::Controller;
 
 use 5.010;
 use Moose;
@@ -31,7 +31,6 @@ has 'player' => (
         if ( $old_player ) {
             $old_player->remove_listener('response_required', $self->curried_callbacks->{response_required});
         }
-
         $player->add_listener('response_required', $self->curried_callbacks->{response_required});
     },
 );
