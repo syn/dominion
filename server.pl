@@ -76,7 +76,6 @@ websocket '/' => sub {
     
     $game->player_add($player);
     Dominion::Controller::Human->new(player => $player);
-    
 	
 	#Send Player connected message 
 	#TODO make this an event
@@ -189,8 +188,8 @@ sub send_to_everyone {
 sub send_to_everyone_else {
 	my ($message, $player) = @_;
 	foreach my $otherplayer ( $player->game->players ) {
-		if($player ne $otherplayer) {
-			$otherplayer->emit('sendmessage'.$message);
+		if($otherplayer ne $player) {	
+			$otherplayer->emit('sendmessage',$message);
 		}
 	}
 }
