@@ -26,7 +26,6 @@ has 'turnstate' => (
     default => 'waiting',
     trigger => sub {
         my ($self, $state) = @_;
-        print "State change for " . $self->name . " to $state\n";
         $self->emit('turnstate', $state);
     }
 );
@@ -134,9 +133,8 @@ sub buy {
     $self->potion_sub($card->cost_potion);
     $self->buys($self->buys - 1);
     $self->discard->add($card);
-	
+
 	$self->emit('broughtcard',$card);
-	 
     $self->cleanup_phase(1) if $self->buys == 0;
 }
 
