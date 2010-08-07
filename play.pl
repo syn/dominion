@@ -14,11 +14,11 @@ $game->player_add($p1);
 $game->player_add($p2);
 $game->player_add($p3);
 
-use Dominion::AI::FullRetard;
-use Dominion::AI::HalfRetard;
-Dominion::AI::HalfRetard->new(player => $p1);
-Dominion::AI::FullRetard->new(player => $p2);
-Dominion::AI::FullRetard->new(player => $p3);
+use Dominion::Controller::AI::FullRetard;
+use Dominion::Controller::AI::HalfRetard;
+Dominion::Controller::AI::HalfRetard->new(player => $p1);
+Dominion::Controller::AI::FullRetard->new(player => $p2);
+Dominion::Controller::AI::FullRetard->new(player => $p3);
 
 $game->add_listener('gameover', sub {
     print "Game over\n";
