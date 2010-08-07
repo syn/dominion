@@ -17,7 +17,6 @@ has 'curried_callbacks' => ( # {{{
         foreach my $cb ( qw(response_required) ) {
             $curried_callbacks->{$cb} = sub { $self->$cb(@_) };
         }
-
         return $curried_callbacks;
     },
 ); # }}}
@@ -32,6 +31,16 @@ has 'player' => (
             $old_player->remove_listener('response_required', $self->curried_callbacks->{response_required});
         }
         $player->add_listener('response_required', $self->curried_callbacks->{response_required});
+        
+        $player->add_listener('broughtcard', sub {
+		    my ($p, $card) = @_;
+		    $p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
+		});
+		$player->add_listener('playedcard', sub {
+			my ($p, $card) = @_;
+		   	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
+		});				
+        
         $self->init;
     },
 );

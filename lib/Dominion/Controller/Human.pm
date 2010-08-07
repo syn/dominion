@@ -26,14 +26,6 @@ sub init {
 	        $self->send_hand;
 	    });
 	    
-	    $self->player->add_listener('broughtcard', sub {
-	    	my ($p, $card) = @_;
-	    	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
-	    });
-	    $self->player->add_listener('playedcard', sub {
-	    	my ($p, $card) = @_;
-	    	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
-	    });
 	    
 	    $self->player->game->supply->add_listener('newsupply',sub {
     		$self->player->emit('sendmessage',Dominion::Com::Messages::Supply->new(supply => $self->player->game->supply)); 

@@ -34,33 +34,19 @@ $game->add_listener('gameover', sub {
 });
 
 
-my $bot1 = Dominion::Player->new(name => 'Half Retard');
-my $bot2 = Dominion::Player->new(name => 'Full Retard');
+my $bot1 = Dominion::Player->new(name => 'HR');
+my $bot2 = Dominion::Player->new(name => 'FR');
+my $bot3 = Dominion::Player->new(name => 'DM');
 $game->player_add($bot1);
 $game->player_add($bot2);
+$game->player_add($bot3);
 
 use Dominion::Controller::AI::FullRetard;
 use Dominion::Controller::AI::HalfRetard;
+use Dominion::Controller::AI::DumbMoney;
 Dominion::Controller::AI::HalfRetard->new(player => $bot1);
 Dominion::Controller::AI::FullRetard->new(player => $bot2);
-
-$bot1->add_listener('broughtcard', sub {
-    my ($p, $card) = @_;
-    $p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
-});
-$bot1->add_listener('playedcard', sub {
-	my ($p, $card) = @_;
-   	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
-});				
-
-$bot2->add_listener('broughtcard', sub {
-    my ($p, $card) = @_;
-    $p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
-});
-$bot2->add_listener('playedcard', sub {
-	my ($p, $card) = @_;
-   	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
-});	
+Dominion::Controller::AI::DumbMoney->new(player => $bot3);
 
 websocket '/' => sub {
 	my $websocketController = shift;
