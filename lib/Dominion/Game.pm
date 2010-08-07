@@ -27,6 +27,17 @@ has 'supply' => ( is => 'ro', isa => 'Dominion::Set::Supply', default => sub { D
 has 'trash' => ( is => 'ro', isa => 'Dominion::Set', default => sub { Dominion::Set->new } );
 has 'inplay' => ( is => 'rw', isa => 'Bool', default => 0 );
 
+has 'interactions' => (
+	traits => ['Array'],
+	default => sub { [] },
+	handles => {
+		interaction_add => 'push',
+	},
+);
+
+	
+
+
 after 'player_add' => sub {
     my ($self, $player) = @_;
 
