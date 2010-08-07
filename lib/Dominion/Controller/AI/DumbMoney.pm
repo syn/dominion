@@ -1,11 +1,11 @@
-package Dominion::AI::DumbMoney;
+package Dominion::Controller::AI::DumbMoney;
 
 use 5.010;
 use Moose;
 use List::Util qw(shuffle);
 no warnings 'recursion';
 
-extends 'Dominion::AI';
+extends 'Dominion::Controller';
 
 has 'buycount' => ( is => 'rw', isa => 'Int', default => 0 );
 
