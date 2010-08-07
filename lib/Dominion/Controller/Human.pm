@@ -9,45 +9,36 @@ extends 'Dominion::Controller';
 
 
 has 'buycount' => ( is => 'rw', isa => 'Int', default => 0 ); 
-has 'player' => (
-    is       => 'rw',
-    isa      => 'Dominion::Player',
-    trigger  => sub {
-        my ($self, $player, $old_player) = @_;
 
-        if ( $old_player ) {
-            $old_player->remove_listener('response_required', $self->curried_callbacks->{response_required});
-        }
-        $player->add_listener('response_required', $self->curried_callbacks->{response_required});
+
+sub init {
+	my ($self) = @_;
     	#add a listener that sends out the players state whenever it changes
-	    $player->add_listener('turnstate', sub {
+	    $self->player->add_listener('turnstate', sub {
 	    	my ($p,$turnstate) = @_;
-	    	send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => $turnstate ,player=>$p),$p->game);
+	    	$p->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => $turnstate ,player=>$p));
 	    });
     	
-    	$player->hand->add_listener('add', sub {
+    	$self->player->hand->add_listener('add', sub {
         	$self->send_hand;
 	    });
-	    $player->hand->add_listener('remove', sub {
+	    $self->player->hand->add_listener('remove', sub {
 	        $self->send_hand;
 	    });
 	    
-	    $player->add_listener('broughtcard', sub {
+	    $self->player->add_listener('broughtcard', sub {
 	    	my ($p, $card) = @_;
-	    	send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
+	    	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
 	    });
-	    $player->add_listener('playedcard', sub {
+	    $self->player->add_listener('playedcard', sub {
 	    	my ($p, $card) = @_;
-	    	send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
+	    	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
 	    });
 	    
-	    $player->game->supply->add_listener('newsupply',sub {
-    		$self->player->emit('sendmessage',Dominion::Com::Messages::Supply->new(supply => $player->game->supply)); 
+	    $self->player->game->supply->add_listener('newsupply',sub {
+    		$self->player->emit('sendmessage',Dominion::Com::Messages::Supply->new(supply => $self->player->game->supply)); 
     	});
-    
-    },
-);
-
+    }
 
 sub action {
     my ($self, $player, $state) = @_;
@@ -86,22 +77,5 @@ sub send_hand {
 	my ($self) = @_;	
 	$self->player->emit('sendmessage',Dominion::Com::Messages::Hand->new(cards => $self->player->hand));
 }
-
-sub send_to_everyone_else {
-	my ($self, $message) = @_;
-	foreach my $otherplayer ( $self->player->game->players ) {
-		if($self->player ne $otherplayer) {
-			$otherplayer->emit('sendmessage',$message);
-		}
-	}
-}
-
-sub send_to_everyone {
-	my ($message, $game) = @_;
-	foreach my $player ($game->players) {
-		$player->emit('sendmessage',$message);
-	}
-}
- 
 #__PACKAGE__->meta->make_immutable;
 1;

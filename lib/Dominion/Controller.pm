@@ -32,6 +32,7 @@ has 'player' => (
             $old_player->remove_listener('response_required', $self->curried_callbacks->{response_required});
         }
         $player->add_listener('response_required', $self->curried_callbacks->{response_required});
+        $self->init;
     },
 );
 
@@ -56,6 +57,9 @@ sub buy {
     die "Need to implement buy";
 }
 
+sub init {
+	
+}
 #__PACKAGE__->meta->make_immutable;
 1;
 

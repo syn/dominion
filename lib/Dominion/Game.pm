@@ -142,6 +142,21 @@ sub state {
     return $state;
 }
 
+sub send_to_everyone {
+	my ($self,$message) = @_;
+	foreach my $player ($self->players) {
+		$player->emit('sendmessage',$message);
+	}
+}
+
+sub send_to_everyone_else {
+	my ($self,$message, $player) = @_;
+	foreach my $otherplayer ( $self->players ) {
+		if($otherplayer ne $player) {	
+			$otherplayer->emit('sendmessage',$message);
+		}
+	}
+}
 
 #__PACKAGE__->meta->make_immutable;
 1;

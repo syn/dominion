@@ -28,7 +28,7 @@ $game->add_listener('gameover', sub {
         }
 		push (@results , $res);
 	}
-	send_to_everyone(Dominion::Com::Messages::EndGame->new(results => [@results]),$game);
+	$game->send_to_everyone(Dominion::Com::Messages::EndGame->new(results => [@results]));
 	#Remove any supply listener updates that have been added, so we don't spam clients if the game is restarted and the supply is cleared.
 	$game->supply->remove_all_listeners('remove');
 });
@@ -46,20 +46,20 @@ Dominion::Controller::AI::FullRetard->new(player => $bot2);
 
 $bot1->add_listener('broughtcard', sub {
     my ($p, $card) = @_;
-    send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
+    $p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
 });
 $bot1->add_listener('playedcard', sub {
 	my ($p, $card) = @_;
-   	send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
+   	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
 });				
 
 $bot2->add_listener('broughtcard', sub {
     my ($p, $card) = @_;
-    send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
+    $p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
 });
 $bot2->add_listener('playedcard', sub {
 	my ($p, $card) = @_;
-   	send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
+   	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
 });	
 
 websocket '/' => sub {
@@ -88,9 +88,7 @@ websocket '/' => sub {
 				
 				local $SIG{__DIE__} = sub { 
 					my ($error) = @_;
-					send_to_everyone(Dominion::Com::Messages::Chat->new(message => 'ERROR processing ' . $player->name . ' : ' . $error, from => 'Server'),$game);
-		      		#Do a Server tick to try and keep things moving along
-		      		
+					$player->game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => 'ERROR processing ' . $player->name . ' : ' . $error, from => 'Server'));
 		    	};
 				my ( $self, $rawmessage ) = @_;
 				my $message = decode_json($rawmessage);
@@ -99,12 +97,12 @@ websocket '/' => sub {
 					when ('namechange') {name_change($player,$message->{'name'});}
 					when ('startgame')  {
 						#Send everyone a message telling them that game has started.
-						send_to_everyone(Dominion::Com::Messages::StartGame->new(),$player->game);
+						$player->game->send_to_everyone(Dominion::Com::Messages::StartGame->new());
 						
 						$player->game->start;
 						
 						#add a listener to send a new supply out to everyone if it changes
-						$game->supply->add_listener('remove',sub {send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply),$player->game);});
+						$game->supply->add_listener('remove',sub {$player->game->send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply));});
 						
 					}
 					when ('choiceresponse') {
@@ -154,7 +152,7 @@ sub player_connected {
 	$player->emit('sendmessage',Dominion::Com::Messages::InitialSetup->new(gamestatus => $game->state->{'state'} , name => $player->name));
     
 	#Send everyone else a message that the player joined the game.
-	send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$player),$player->game);
+	$player->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$player));
 	#Send this player a message about everyone else who is in the game
 	 foreach my $otherplayer ( $player->game->players ) {
      	if($player!=$otherplayer) {
@@ -165,33 +163,15 @@ sub player_connected {
 
 
 sub chat_message {
-	my ($game,$p,$incomingmessag) = @_;
-	send_to_everyone(Dominion::Com::Messages::Chat->new(message => $incomingmessag->{'message'} , from => $p->name),$game);
+	my ($game,$player,$incomingmessag) = @_;
+	$game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => $incomingmessag->{'message'} , from => $player->name));
 }
 
 sub name_change {
 	my ($player, $n) = @_;
 	$player->name($n);
 	#TODO, set a playerID
-	send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'namechange' ,  player => $player),$game); 
-}
-
-
-
-sub send_to_everyone {
-	my ($message, $game) = @_;
-	foreach my $player ($game->players) {
-		$player->emit('sendmessage',$message);
-	}
-}
-
-sub send_to_everyone_else {
-	my ($message, $player) = @_;
-	foreach my $otherplayer ( $player->game->players ) {
-		if($otherplayer ne $player) {	
-			$otherplayer->emit('sendmessage',$message);
-		}
-	}
+	$player->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'namechange' ,  player => $player)); 
 }
 
 get '/' => 'index';
