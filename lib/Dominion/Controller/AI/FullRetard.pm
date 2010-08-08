@@ -7,8 +7,12 @@ extends 'Dominion::Controller::AI';
 
 sub action {
     my ($self, $player, $state) = @_;
-
+	print $player->name . ": I have:\n";
+    print join("\n", map { $_->name } ($player->hand->cards_of_type('action')));
+    print "\n";
     my $card_name = ($player->hand->cards_of_type('action'))[0]->name;
+    print "Playing: ", $card_name, "\n";
+    print "-------\n";
     $player->play($card_name);
 }
 

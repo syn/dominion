@@ -11,7 +11,6 @@ has 'buycount' => ( is => 'rw', isa => 'Int', default => 0 );
 
 sub action {
     my ($self, $player, $state) = @_;
-
     my $card;
 
     $card //= ($player->hand->grep(sub { $_->name eq 'Market' }))[0];
@@ -21,7 +20,7 @@ sub action {
     # Fallback
     $card //= ($player->hand->cards_of_type('action'))[0];
 
-    print "I have:\n";
+    print $player->name . ": I have:\n";
     print join("\n", map { $_->name } ($player->hand->cards_of_type('action')));
     print "\n";
     print "Playing: ", $card->name, "\n";

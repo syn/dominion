@@ -89,7 +89,7 @@ sub action_phase {
 
 sub play {
     my ($self, $card_name) = @_;
-
+	print "Player state in Play 1 " . $self->turnstate. "\n";
     die "You're not currently in a game" unless $self->game;
     die "The game isn't currently in play" unless $self->game->inplay;
     die "You're not currently in the action-phase of your turn" unless $self->turnstate eq 'action';
@@ -105,7 +105,9 @@ sub play {
     $self->emit('playedcard',$card);
     $card->action($self, $self->game);
 	print "Interaction count " . $self->game->interaction_count . "\n";
+	print "Player state in Play 2" . $self->turnstate. "\n";
 	return if $self->game->interaction_count > 0 or $self->turnstate eq 'waitingoninteraction';
+    print "here\n";
     $self->buy_phase if $self->actions == 0 or $self->hand->grep(sub { $_->is('action') }) == 0;
 }
 

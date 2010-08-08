@@ -57,7 +57,7 @@ sub response_required {
     my ($player, @data) = @_;
 	my $state = $data[0];
     print "WTF!\n" unless $player->name eq $self->player->name;
-	print "response Required " . $state->{state} . "\n";
+	print "response Required " . $state->{state} . " - ". $self->player->turnstate."\n";
     given ( $state->{state} ) {
         when ( 'action' ) { $self->action(@_) }
         when ( 'buy' ) { $self->buy(@_) }

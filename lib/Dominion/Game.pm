@@ -57,7 +57,9 @@ sub interaction_remove {
 	print "Reseting player state to " . $interaction->turnstate . "\n";
 	$interaction->player->turnstate($interaction->turnstate);
 	if ($self->interaction_count == 0) {
-		$self->active_player->turnstate('action');
+		#$self->active_player->turnstate('action');
+		$self->active_player->action_phase;
+		$self->active_player->emit('tick');
 	}
 };
 

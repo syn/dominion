@@ -122,7 +122,7 @@ websocket '/' => sub {
 										'Dominion::Interactions::Discard'  => sub { 
 										$option->discard_add($player->hand->card_by_name($message->{'card'}));
 										$interaction->resolveCallback->($interaction,$option);
-										$player->emit('tick');
+										#$player->emit('tick');
 										return;
 										}
 									)
