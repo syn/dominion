@@ -2,9 +2,9 @@ package Dominion::Controller;
 
 use 5.010;
 use Moose;
-no warnings 'recursion';
 
 with 'Dominion::EventEmitter';
+use Dominion::Com::Messages;
 
 has 'curried_callbacks' => ( # {{{
     is  => 'ro',
@@ -14,7 +14,7 @@ has 'curried_callbacks' => ( # {{{
 
         my $curried_callbacks = {};
 
-        foreach my $cb ( qw(response_required) ) {
+        foreach my $cb ( qw(action buy) ) {
             $curried_callbacks->{$cb} = sub { $self->$cb(@_) };
         }
         return $curried_callbacks;
@@ -28,10 +28,10 @@ has 'player' => (
         my ($self, $player, $old_player) = @_;
 
         if ( $old_player ) {
-            $old_player->remove_listener('response_required', $self->curried_callbacks->{response_required});
+            foreach my $cb ( qw(action buy) ) {
+                $old_player->remove_listener($cb, $self->curried_callbacks->{$cb});
+            }
         }
-        $player->add_listener('response_required', $self->curried_callbacks->{response_required});
-        
         $player->add_listener('broughtcard', sub {
 		    my ($p, $card) = @_;
 		    $p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
@@ -41,7 +41,11 @@ has 'player' => (
 		   	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
 		});				
         
+        foreach my $cb ( qw(action buy) ) {
+            $player->add_listener($cb, $self->curried_callbacks->{$cb});
+        }
         $self->init;
+
     },
 );
 

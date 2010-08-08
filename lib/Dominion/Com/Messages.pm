@@ -1,4 +1,4 @@
-package Dominion::Messagess;
+package Dominion::Com::Messages;
 
 use strict;
 use warnings;
