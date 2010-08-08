@@ -4,7 +4,7 @@ use 5.010;
 use Moose;
 use List::Util qw(shuffle);
 
-extends 'Dominion::Controller';
+extends 'Dominion::Controller::AI';
 
 has 'buycount'    => ( is => 'rw', isa => 'Int', default => 0 );
 has 'moneylender' => ( is => 'rw', isa => 'Bool', default => 0 );

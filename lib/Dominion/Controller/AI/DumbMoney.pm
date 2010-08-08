@@ -5,7 +5,7 @@ use Moose;
 use List::Util qw(shuffle);
 no warnings 'recursion';
 
-extends 'Dominion::Controller';
+extends 'Dominion::Controller::AI';
 
 has 'buycount' => ( is => 'rw', isa => 'Int', default => 0 );
 

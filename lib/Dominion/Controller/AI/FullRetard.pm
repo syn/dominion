@@ -2,7 +2,7 @@ package Dominion::Controller::AI::FullRetard;
 
 use Moose;
 
-extends 'Dominion::Controller';
+extends 'Dominion::Controller::AI';
 
 sub action {
     my ($self, $player, $state) = @_;
@@ -31,6 +31,7 @@ sub buy {
 
 sub init {
 	my ($self) = @_;
+	$self->SUPER::init();
 	$self->player->add_listener('sendmessage',  sub {
 		my($player,$message) = @_;	
 		if($message->type eq 'message' && int rand()* 10 == 1) {
