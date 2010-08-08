@@ -20,6 +20,7 @@ sub action {
         $game->attack($other_player, sub {
             my $curse = $game->supply->card_by_name('Curse');
             $other_player->discard->add($curse) if $curse;
+            $other_player->game->send_to_everyone(Dominion::Com::Messages::CardPlayed->new(actiontype => 'witchresolve', card=>$curse, player=>$other_player));
         });
     }
 }
