@@ -34,19 +34,19 @@ $game->add_listener('gameover', sub {
 });
 
 
-my $bot1 = Dominion::Player->new(name => 'HR');
-my $bot2 = Dominion::Player->new(name => 'FR');
-my $bot3 = Dominion::Player->new(name => 'DM');
-$game->player_add($bot1);
-$game->player_add($bot2);
-$game->player_add($bot3);
-
-use Dominion::Controller::AI::FullRetard;
-use Dominion::Controller::AI::HalfRetard;
-use Dominion::Controller::AI::DumbMoney;
-Dominion::Controller::AI::HalfRetard->new(player => $bot1);
-Dominion::Controller::AI::FullRetard->new(player => $bot2);
-Dominion::Controller::AI::DumbMoney->new(player => $bot3);
+#my $bot1 = Dominion::Player->new(name => 'HR');
+#my $bot2 = Dominion::Player->new(name => 'FR');
+#my $bot3 = Dominion::Player->new(name => 'DM');
+#$game->player_add($bot1);
+#$game->player_add($bot2);
+#$game->player_add($bot3);
+#
+#use Dominion::Controller::AI::FullRetard;
+#use Dominion::Controller::AI::HalfRetard;
+#use Dominion::Controller::AI::DumbMoney;
+#Dominion::Controller::AI::HalfRetard->new(player => $bot1);
+#Dominion::Controller::AI::FullRetard->new(player => $bot2);
+#Dominion::Controller::AI::DumbMoney->new(player => $bot3);
 
 websocket '/' => sub {
 	my $websocketController = shift;
@@ -95,20 +95,23 @@ websocket '/' => sub {
 						given($message->{'event'}) {
 							when ('cardbrought') {
 								$player->buy($message->{'card'});
+								$game->tick;
 								return;
 							}
 							
 							when ('finishturn') {
 								$player->cleanup_phase;
+								$game->tick;
 								return;
 							}
 							when ('finishactionphase') {
 								$player->buy_phase;
-								$player->emit('tick');
+								$game->tick;
 								return;
 							}
 							when ('playcard') {
 								$player->play($message->{'card'});
+								$game->tick;
 								return;
 							}
 							default {print Dumper($message);}
@@ -135,7 +138,7 @@ sub player_connected {
 	my ($game,$player) = @_;
 
 	#Send some game state.
-	$player->emit('sendmessage',Dominion::Com::Messages::InitialSetup->new(gamestatus => $game->state->{'state'} , name => $player->name));
+	$player->emit('sendmessage',Dominion::Com::Messages::InitialSetup->new(gamestatus => $game->state , name => $player->name));
     
 	#Send everyone else a message that the player joined the game.
 	$player->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$player));
@@ -150,6 +153,7 @@ sub player_connected {
 
 sub chat_message {
 	my ($game,$player,$incomingmessag) = @_;
+	$game->tick;
 	$game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => $incomingmessag->{'message'} , from => $player->name));
 }
 
