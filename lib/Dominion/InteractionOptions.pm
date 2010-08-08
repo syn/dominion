@@ -1,9 +1,35 @@
 package Dominion::InteractionOptions;
 
-use strict;
-use warnings;
-use Module::Pluggable sub_name => 'all', search_path => 'Dominion::InteractionOptions', require => 1;
+use Moose;
+use Dominion::Player;
 
-__PACKAGE__->all;
+has 'cause' => (isa => 'Str', is => 'rw', required => 1 ); 
+has 'card'       => ( isa => 'Dominion::Card', is => 'rw' , required => 1);
+has 'resolveCallback' => ( is => 'rw', isa => 'CodeRef');
+
+has 'player' => (
+    is       => 'rw',
+    isa      => 'Dominion::Player',
+);
+
+
+has 'turnstate' => (
+    is => 'rw',
+    isa => 'Str',
+    default => 'waiting',
+    required => 1,
+);
+
+has 'options' => (
+    traits   => ['Array'],
+    isa      => 'ArrayRef[Dominion::Interaction]',
+    default  => sub { [] },
+    handles  => {
+        add      => 'push',
+        options    => 'elements',
+        count    => 'count',
+        get      => 'get',
+    },
+);
 
 1;

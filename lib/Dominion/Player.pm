@@ -16,7 +16,7 @@ has 'game'      => ( is => 'rw', isa => 'Dominion::Game', default => undef );
 
 subtype 'TurnState'
   => as 'Str'
-  => where { $_ eq 'waiting' or $_ eq 'action' or $_ eq 'buy' }
+  => where { $_ eq 'waiting' or $_ eq 'action' or $_ eq 'buy' or $_ eq 'interaction' or $_ eq 'waitingoninteraction' }
   => message { "Invalid turn state specified: $_" }
 ;
 
@@ -102,15 +102,18 @@ sub play {
 
     $self->playarea->add($card);
     $self->actions($self->actions - 1);
+    $self->emit('playedcard',$card);
     $card->action($self, $self->game);
-	$self->emit('playedcard',$card);
+	print "Interaction count " . $self->game->interaction_count . "\n";
+	return if $self->game->interaction_count > 0 or $self->turnstate eq 'waitingoninteraction';
     $self->buy_phase if $self->actions == 0 or $self->hand->grep(sub { $_->is('action') }) == 0;
 }
 
 sub buy_phase {
     my ($self) = @_;
-	print "Starting buy phase for " . $self->name . "\n";
+	print "Starting buy phase for " . $self->name . " - starting coin - " . $self->coin . "\n";
     $self->turnstate('buy');
+    print "Adding coin " . $self->hand->total_coin . "\n";
     $self->coin_add($self->hand->total_coin);
 }
 

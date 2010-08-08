@@ -5,7 +5,7 @@ use Moose;
 use List::Util qw(shuffle);
 no warnings 'recursion';
 
-extends 'Dominion::Controller';
+extends 'Dominion::Controller::AI';
 
 has 'buycount' => ( is => 'rw', isa => 'Int', default => 0 );
 
@@ -31,7 +31,7 @@ sub action {
 
 sub buy {
     my ($self, $player, $state) = @_;
-
+	print "In HR Buy\n";
     $self->buycount($self->buycount+1);
 
     my $game = $player->game;
@@ -48,7 +48,7 @@ sub buy {
             @list = qw(Village Silver);
         }
         when ( 4 ) {
-            @list = qw(Smithy);
+            @list = qw(Militia Smithy);
             push @list, 'Gardens' if $self->buycount > 10;
         }
         when ( 5 ) {

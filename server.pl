@@ -10,6 +10,7 @@ use Data::Dumper;
 
 use Dominion::Game;
 use Dominion::Com::Messages;
+use Moose::Util::TypeConstraints;
 
 use Dominion::Controller::Human;
 
@@ -109,6 +110,24 @@ websocket '/' => sub {
 							}
 							when ('playcard') {
 								$player->play($message->{'card'});
+								return;
+							}
+							when ('discardinteraction') {
+								#get Interaction for player
+								my $interaction = $player->game->interaction_get_for_player($player);
+								#look for the discard option
+								foreach my $option ( $interaction->options )
+								{
+									match_on_type $option => (
+										'Dominion::Interactions::Discard'  => sub { 
+										$option->discard_add($player->hand->card_by_name($message->{'card'}));
+										$interaction->resolveCallback->($interaction,$option);
+										$player->emit('tick');
+										return;
+										}
+									)
+								}
+								
 								return;
 							}
 							default {print Dumper($message);}

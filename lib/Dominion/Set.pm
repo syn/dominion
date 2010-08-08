@@ -72,7 +72,10 @@ sub cards_of_type {
 
 sub total_coin {
     my ($self) = @_;
-
+	foreach my $card ($self->cards) {
+		print $card->name ." ";
+	}
+	print "\n";
     return $self->reduce(sub {
         my ($a, $b) = @_;
         $a = $a->coin if UNIVERSAL::isa($a, 'Dominion::Card');

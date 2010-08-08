@@ -2,6 +2,7 @@ package Dominion::Controller::Human;
 
 use 5.010;
 use Moose;
+use Moose::Util::TypeConstraints;
 use List::Util qw(shuffle);
 no warnings 'recursion';
 
@@ -9,7 +10,6 @@ extends 'Dominion::Controller';
 
 
 has 'buycount' => ( is => 'rw', isa => 'Int', default => 0 ); 
-
 
 sub init {
 	my ($self) = @_;
@@ -25,7 +25,6 @@ sub init {
 	    $self->player->hand->add_listener('remove', sub {
 	        $self->send_hand;
 	    });
-	    
 	    
 	    $self->player->game->supply->add_listener('newsupply',sub {
     		$self->player->emit('sendmessage',Dominion::Com::Messages::Supply->new(supply => $self->player->game->supply)); 
@@ -62,6 +61,26 @@ sub buy {
 
 	$choice->add($option1);
 	$choice->add($option2);
+	$self->player->emit('sendmessage',$choice);
+}
+
+sub interaction {
+	my ( $self, @data ) = @_;
+	my $state       = $data[1];
+	my $interaction = $data[2];
+	print "Handling interaction " . $interaction->cause . "\n";
+
+	my $choice = Dominion::Com::Messages::Choice->new(message => 'Resolve '  . $interaction->cause);
+	#Look through the interaction option list
+	foreach my $option ( $interaction->options )
+	{
+		match_on_type $option => (
+			'Dominion::Interactions::Discard'  => sub { 
+				my $o =Dominion::Com::Messages::Options::Discard->new(event => 'discardinteraction',numbertodiscard => $option->numbertodiscard,cards => [$option->cards]);
+				$choice->add($o);
+			},
+		),
+	}
 	$self->player->emit('sendmessage',$choice);
 }
 

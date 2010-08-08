@@ -373,6 +373,8 @@ function makehanddraggable (cards) {
 	var oldarr = new Array();
 	for ( var i in cards ) {
 		oldarr.push(cards[i].name);
+		console.log("card " + i);
+		console.log("Dragging " + cards[i].name )
 	}
 	oldarr.sort();j=0;
 	newarr= new Array();
@@ -448,7 +450,6 @@ function makesupplydraggable ( cards) {
 		});
 	}
 }
-
 
 function changename (name) {
 	var message = new nameupdate(name);

@@ -29,18 +29,48 @@ has 'inplay' => ( is => 'rw', isa => 'Bool', default => 0 );
 
 has 'interactions' => (
 	traits => ['Array'],
+	isa      => 'ArrayRef[Dominion::InteractionOptions]',
 	default => sub { [] },
 	handles => {
+		interactions    => 'elements',
 		interaction_add => 'push',
+		interaction_count => 'count',
+		interaction_delete => 'delete',
 	},
 );
 
+after 'interaction_add' => sub {
+	my ($self, $interaction) = @_;
+	$interaction->turnstate($interaction->player->turnstate);
+	$interaction->player->turnstate('interaction');
+	$interaction->player->emit('response_required',({state => 'interaction'},$interaction));
 	
+};
 
+sub interaction_remove {
+	my ($self,$interaction) = @_;
+	for (my $i = 0 ; $i < $self->interaction_count ; $i++) {
+		if ( ($self->interactions)[$i] == $interaction) {
+			$self->interaction_delete($i);
+		}
+	};
+	print "Reseting player state to " . $interaction->turnstate;
+	$interaction->player->turnstate($interaction->turnstate);
+	if ($self->interaction_count == 0) {
+		$self->active_player->turnstate('action');
+	}
+};
 
+sub interaction_get_for_player {
+	my ($self,$player) = @_;
+	foreach my $inter ($self->interactions) {
+		if ($inter->player eq $player) {
+			return $inter;
+		}
+	}
+}
 after 'player_add' => sub {
     my ($self, $player) = @_;
-
     $player->game($self);
 };
 

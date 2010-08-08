@@ -3,7 +3,7 @@ package Dominion::Controller::AI::FullRetard;
 use Moose;
 no warnings 'recursion';
 
-extends 'Dominion::Controller';
+extends 'Dominion::Controller::AI';
 
 sub action {
     my ($self, $player, $state) = @_;
@@ -14,10 +14,11 @@ sub action {
 
 sub buy {
     my ($self, $player, $state) = @_;
-
+	print "In FR Buy\n";
     my $game = $player->game;
 
     my $coin = $state->{coin};
+    print "coin = $coin \n";
     while ( $coin >= 0 ) {
         my @card_names = map { $_->name } grep { $_->cost_coin == $coin } $game->supply->cards;
         unless ( @card_names ) {

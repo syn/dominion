@@ -7,18 +7,18 @@ use warnings;
 use Dominion::Game;
 
 my $game = Dominion::Game->new();
-my $p1 = Dominion::Player->new(name => 'Martyn');
-my $p2 = Dominion::Player->new(name => 'Fred');
-my $p3 = Dominion::Player->new(name => 'Harold');
+my $p1 = Dominion::Player->new(name => 'HR');
+my $p2 = Dominion::Player->new(name => 'FR');
+#my $p3 = Dominion::Player->new(name => 'Harold');
 $game->player_add($p1);
 $game->player_add($p2);
-$game->player_add($p3);
+#$game->player_add($p3);
 
 use Dominion::Controller::AI::FullRetard;
 use Dominion::Controller::AI::HalfRetard;
 Dominion::Controller::AI::HalfRetard->new(player => $p1);
 Dominion::Controller::AI::FullRetard->new(player => $p2);
-Dominion::Controller::AI::FullRetard->new(player => $p3);
+#Dominion::Controller::AI::FullRetard->new(player => $p3);
 
 $game->add_listener('gameover', sub {
     print "Game over\n";
