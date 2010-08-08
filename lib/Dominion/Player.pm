@@ -26,6 +26,10 @@ has 'turnstate' => (
     is => 'rw',
     isa => 'TurnState',
     default => 'waiting',
+    trigger => sub {
+        my ($self, $state) = @_;
+        $self->emit('turnstate', $state);
+    }
 );
 
 has 'actions'    => (
