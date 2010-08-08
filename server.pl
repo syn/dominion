@@ -5,6 +5,7 @@ use warnings;
 use feature qw(switch);
 
 use Mojolicious::Lite;
+use Mojo::IOLoop;
 use JSON;
 use Data::Dumper;
 
@@ -15,6 +16,7 @@ use Dominion::Controller::Human;
 
 my $game = Dominion::Game->new;
 my $playercount = 0; #The number of players we have seen so far, only used for sequential initial names
+
 
 $game->add_listener('postgame', sub {
    
@@ -130,16 +132,7 @@ websocket '/' => sub {
 };
 
 sub gametick {
-	my($game) = @_;
-	my $hack = 0;
-	do {
-		if($game->active_player->isbot) {$hack++};
-		$game->tick;
-	} while ( $game->state ne 'postgame' && $game->active_player->isbot) ;
-	
-	if ($hack) {
-		$game->tick;
-	}
+	$game->tick;
 }
 
 sub player_connected {
@@ -168,6 +161,17 @@ sub name_change {
 	my ($player, $n) = @_;
 	$player->name($n);
 	$player->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'namechange' ,  player => $player)); 
+}
+
+
+my $loop = Mojo::IOLoop->singleton;
+my $id = $loop->timer(0.25 => \&tick);
+
+sub tick {
+	if( $game->state ne 'postgame' && $game->state ne 'pregame' && ($game->active_player->isbot || $game->active_player->hasticked == 0))  {
+		$game->tick;
+	} 
+	$id = $loop->timer(0.5 => \&tick);
 }
 
 get '/' => 'index';

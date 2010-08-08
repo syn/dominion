@@ -86,7 +86,8 @@ sub tick {
                     state   => $state,
                     player  => $self->active_player,
                     id      => $self->sequence,
-                }
+                };
+                $self->active_player->hasticked(1);
             }
             when ('postgame') {
             	$self->emit('postgame');
