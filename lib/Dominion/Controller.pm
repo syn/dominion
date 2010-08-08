@@ -2,6 +2,7 @@ package Dominion::Controller;
 
 use 5.010;
 use Moose;
+use Moose::Util::TypeConstraints;
 
 with 'Dominion::EventEmitter';
 use Dominion::Com::Messages;
@@ -14,7 +15,7 @@ has 'curried_callbacks' => ( # {{{
 
         my $curried_callbacks = {};
 
-        foreach my $cb ( qw(action buy) ) {
+        foreach my $cb ( qw(action buy interaction) ) {
             $curried_callbacks->{$cb} = sub { $self->$cb(@_) };
         }
         return $curried_callbacks;
@@ -28,10 +29,11 @@ has 'player' => (
         my ($self, $player, $old_player) = @_;
 
         if ( $old_player ) {
-            foreach my $cb ( qw(action buy) ) {
+            foreach my $cb ( keys %{$self->curried_callbacks} ) {
                 $old_player->remove_listener($cb, $self->curried_callbacks->{$cb});
             }
         }
+
         $player->add_listener('broughtcard', sub {
 		    my ($p, $card) = @_;
 		    $p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'cardbrought', card=>$card, player=>$p),$p);
@@ -41,7 +43,9 @@ has 'player' => (
 		   	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
 		});				
         
-        foreach my $cb ( qw(action buy) ) {
+
+
+        foreach my $cb ( keys %{$self->curried_callbacks} ) {
             $player->add_listener($cb, $self->curried_callbacks->{$cb});
         }
         $self->init;
@@ -64,6 +68,28 @@ sub init {
 	    	$p->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => $turnstate ,player=>$p));
 	});
 }
+
+sub interaction {
+    my ($self, $player, $state) = @_;
+
+    my $interaction = $state->{interaction};
+
+    match_on_type $interaction => (
+        'Dominion::Interaction::Attack' => sub {
+            $self->attack($player, $state, $interaction);
+        }
+        => sub {
+            die "Can't deal with interaction: " . ref $interaction;
+        },
+    );
+}
+
+sub attack {
+    my ($self, $player, $state, $attack) = @_;
+
+    die "Need to implement attack";
+}
+
 #__PACKAGE__->meta->make_immutable;
 1;
 
