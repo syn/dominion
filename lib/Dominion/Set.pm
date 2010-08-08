@@ -72,10 +72,10 @@ sub cards_of_type {
 
 sub total_coin {
     my ($self) = @_;
-	foreach my $card ($self->cards) {
-		print $card->name ." ";
-	}
-	print "\n";
+
+    return 0 if $self->count == 0;
+    return $self->first(sub{1})->coin if $self->count == 1;
+
     return $self->reduce(sub {
         my ($a, $b) = @_;
         $a = $a->coin if UNIVERSAL::isa($a, 'Dominion::Card');
@@ -85,6 +85,13 @@ sub total_coin {
 
 sub total_victory_points {
     my ($self) = @_;
+
+    return 0 if $self->count == 0;
+    if ( $self->count == 1 ) {
+        my $card = $self->first(sub{1});
+        return $card->victory_points if $card->can('victory_points');
+        return 0;
+    }
 
     return $self->reduce(sub {
         my ($a, $b) = @_;
