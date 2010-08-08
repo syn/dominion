@@ -34,19 +34,16 @@ $game->add_listener('gameover', sub {
 });
 
 
-#my $bot1 = Dominion::Player->new(name => 'HR');
-#my $bot2 = Dominion::Player->new(name => 'FR');
-#my $bot3 = Dominion::Player->new(name => 'DM');
-#$game->player_add($bot1);
-#$game->player_add($bot2);
-#$game->player_add($bot3);
-#
-#use Dominion::Controller::AI::FullRetard;
-#use Dominion::Controller::AI::HalfRetard;
-#use Dominion::Controller::AI::DumbMoney;
-#Dominion::Controller::AI::HalfRetard->new(player => $bot1);
-#Dominion::Controller::AI::FullRetard->new(player => $bot2);
-#Dominion::Controller::AI::DumbMoney->new(player => $bot3);
+use Dominion::Controller::AI::FullRetard;
+use Dominion::Controller::AI::HalfRetard;
+use Dominion::Controller::AI::MoneyWhore;
+use Dominion::Controller::AI::DumbMoney;
+
+foreach my $AI ( qw(MoneyWhore FullRetard HalfRetard) ) {
+    my $player = Dominion::Player->new(name => $AI);
+    $game->player_add($player);
+    "Dominion::Controller::AI::$AI"->new(player => $player);
+}
 
 websocket '/' => sub {
 	my $websocketController = shift;
@@ -86,7 +83,7 @@ websocket '/' => sub {
 						$player->game->send_to_everyone(Dominion::Com::Messages::StartGame->new());
 						
 						$player->game->start;
-						
+						gametick($game);
 						#add a listener to send a new supply out to everyone if it changes
 						$game->supply->add_listener('remove',sub {$player->game->send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply));});
 						
@@ -95,23 +92,23 @@ websocket '/' => sub {
 						given($message->{'event'}) {
 							when ('cardbrought') {
 								$player->buy($message->{'card'});
-								$game->tick;
+								gametick($game);
 								return;
 							}
 							
 							when ('finishturn') {
 								$player->cleanup_phase;
-								$game->tick;
+								gametick($game);
 								return;
 							}
 							when ('finishactionphase') {
 								$player->buy_phase;
-								$game->tick;
+								gametick($game);
 								return;
 							}
 							when ('playcard') {
 								$player->play($message->{'card'});
-								$game->tick;
+								gametick($game);
 								return;
 							}
 							default {print Dumper($message);}
@@ -132,7 +129,18 @@ websocket '/' => sub {
 	);
 };
 
-
+sub gametick {
+	my($game) = @_;
+	my $hack = 0;
+	do {
+		if($game->active_player->isbot) {$hack++};
+		$game->tick;
+	} while ( $game->state ne 'postgame' && $game->active_player->isbot) ;
+	
+	if ($hack) {
+		$game->tick;
+	}
+}
 
 sub player_connected {
 	my ($game,$player) = @_;
@@ -153,14 +161,12 @@ sub player_connected {
 
 sub chat_message {
 	my ($game,$player,$incomingmessag) = @_;
-	$game->tick;
 	$game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => $incomingmessag->{'message'} , from => $player->name));
 }
 
 sub name_change {
 	my ($player, $n) = @_;
 	$player->name($n);
-	#TODO, set a playerID
 	$player->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'namechange' ,  player => $player)); 
 }
 
