@@ -14,6 +14,7 @@ has 'playarea'  => ( is => 'ro', isa => 'Dominion::Set', default => sub { Domini
 has 'deck'      => ( is => 'ro', isa => 'Dominion::Set', default => sub { Dominion::Set->new } );
 has 'discard'   => ( is => 'ro', isa => 'Dominion::Set', default => sub { Dominion::Set->new } );
 has 'game'      => ( is => 'rw', isa => 'Dominion::Game', default => undef );
+has 'isbot' => ( is => 'rw', isa => 'Bool', default => 0 );
 
 subtype 'TurnState'
   => as 'Str'
