@@ -27,6 +27,7 @@ has 'trash' => ( is => 'ro', isa => 'Dominion::Set', default => sub { Dominion::
 has 'inplay' => ( is => 'rw', isa => 'Bool', default => 0 );
 has '_sequence' => ( is  => 'rw', isa => 'Int', default => 0 );
 
+
 sub sequence_reset { shift->_sequence(0) }
 sub sequence {
     my ($self) = @_;
@@ -70,14 +71,12 @@ sub start {
     $self->active_player(($self->players)[0]);
     $self->inplay(1);
     $self->active_player->action_phase;
-    $self->tick;
 }
 
 sub tick {
     my ($self) = @_;
 
     my @pending;
-
     # Unless there's a pending action, figure out some new ones
     unless ( @pending ) {
         my $state = $self->state;
