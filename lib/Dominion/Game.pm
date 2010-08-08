@@ -88,6 +88,9 @@ sub tick {
                     id      => $self->sequence,
                 }
             }
+            when ('postgame') {
+            	$self->emit('postgame');
+            }
             when ( 'pants' ) {
                 print "PANTS\n";
             }
