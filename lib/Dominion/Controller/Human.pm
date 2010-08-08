@@ -13,12 +13,9 @@ has 'buycount' => ( is => 'rw', isa => 'Int', default => 0 );
 
 sub init {
 	my ($self) = @_;
+	$self->SUPER::init();
     	#add a listener that sends out the players state whenever it changes
-	    $self->player->add_listener('turnstate', sub {
-	    	my ($p,$turnstate) = @_;
-	    	$p->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => $turnstate ,player=>$p));
-	    });
-    	
+	    
     	$self->player->hand->add_listener('add', sub {
         	$self->send_hand;
 	    });
@@ -30,7 +27,7 @@ sub init {
 	    $self->player->game->supply->add_listener('newsupply',sub {
     		$self->player->emit('sendmessage',Dominion::Com::Messages::Supply->new(supply => $self->player->game->supply)); 
     	});
-    }
+}
 
 sub action {
     my ($self, $player, $state) = @_;

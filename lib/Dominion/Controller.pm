@@ -58,7 +58,11 @@ sub buy {
 }
 
 sub init {
-
+	my ($self) = @_;
+	$self->player->add_listener('turnstate', sub {
+	    	my ($p,$turnstate) = @_;
+	    	$p->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => $turnstate ,player=>$p));
+	});
 }
 #__PACKAGE__->meta->make_immutable;
 1;
