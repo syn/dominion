@@ -16,7 +16,7 @@ use Dominion::Controller::Human;
 my $game = Dominion::Game->new;
 my $playercount = 0; #The number of players we have seen so far, only used for sequential initial names
 
-$game->add_listener('gameover', sub {
+$game->add_listener('postgame', sub {
    
     my @results;
 	foreach my $player ( $game->players ) {
