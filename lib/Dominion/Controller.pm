@@ -49,19 +49,6 @@ has 'player' => (
     },
 );
 
-sub response_required {
-    my $self = shift;
-    my ($player, $state) = @_;
-
-    print "WTF!\n" unless $player->name eq $self->player->name;
-
-    given ( $state->{state} ) {
-        when ( 'action' ) { $self->action(@_) }
-        when ( 'buy' ) { $self->buy(@_) }
-        default { die "Don't know how to deal with state: $state->{state}" }
-    }
-}
-
 sub action {
     die "Need to implement action";
 }
@@ -71,7 +58,7 @@ sub buy {
 }
 
 sub init {
-	
+
 }
 #__PACKAGE__->meta->make_immutable;
 1;
