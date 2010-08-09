@@ -20,6 +20,7 @@ has 'players' => (
         player_number   => 'get',
         player_clear    => 'clear',
         _player_shuffle => 'shuffle',
+        player_delete   => 'delete',
     },
 );
 has 'set_interactions' => (
@@ -56,6 +57,19 @@ sub player_shuffle {
     my @shuffled = $self->_player_shuffle;
     $self->player_clear;
     $self->player_add(@shuffled);
+}
+
+sub player_remove {
+	my ($self,$player) = @_;
+	#if this player is the current player
+	if ($player eq $self->active_player) {
+		$self->finished_turn($player);
+	}
+	my $i;
+	for ( $i = 0; $i < $self->player_count; $i++ ) {
+        last if $self->player_number($i) == $player;
+    }
+	$self->player_delete($i);
 }
 
 sub start {

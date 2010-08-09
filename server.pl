@@ -125,7 +125,9 @@ websocket '/' => sub {
 	# Finished
 	$websocketController->finished(
 		sub {
-			#TODO remove the player from the game
+			
+			$player->game->send_to_everyone_else(Dominion::Com::Messages::PlayerStatus->new(action => 'quit' ,player=>$player));
+			$player->game->player_remove($player);
 			
 		}
 	);
