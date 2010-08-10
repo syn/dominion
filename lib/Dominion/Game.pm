@@ -39,6 +39,7 @@ has 'supply' => ( is => 'ro', isa => 'Dominion::Set::Supply', default => sub { D
 has 'trash' => ( is => 'ro', isa => 'Dominion::Set', default => sub { Dominion::Set->new } );
 has 'inplay' => ( is => 'rw', isa => 'Bool', default => 0 );
 has '_sequence' => ( is  => 'rw', isa => 'Int', default => 0 );
+has 'resultssent' => ( is => 'rw', isa => 'Bool', default => 0 );
 
 sub sequence_reset { shift->_sequence(0) }
 sub sequence {
@@ -78,7 +79,7 @@ sub start {
     die "Invalid number of players: " . $self->player_count unless $self->player_count >= 2 and $self->player_count <= 8;
 
     $self->supply->init($self->player_count);
-
+	$self->resultssent(0);
     foreach my $player ( $self->players ) {
         $player->reset;
         $player->deck->add($self->supply->card_by_name('Copper')) for 1..7;
@@ -100,7 +101,7 @@ sub remove_resolved_interactions {
     my ($self) = @_;
 
     my @pending_interactions = grep { not $_->resolved } $self->interactions;
-
+    @pending_interactions = grep { not $_->cancelled } @pending_interactions;
     $self->set_interactions(\@pending_interactions);
 }
 
@@ -121,10 +122,8 @@ sub tick {
                 };
                 $self->active_player->hasticked(1);
             }
-            when ('postgame') {
-            	$self->emit('postgame');
-            }
             when ( 'interaction' ) {
+            	$self->remove_resolved_interactions;
                 foreach my $interaction ( $self->interactions ) {
                     push @pending, {
                         state       => $state,
@@ -132,6 +131,9 @@ sub tick {
                         interaction => $interaction,
                     }
                 }
+            }
+            when ( 'interaction' ) {
+            	#Do nothing 	
             }
             default {
                 die "Unknown state: $state";

@@ -11,6 +11,7 @@ extends 'Dominion::Controller';
 has 'buycount' => ( is => 'rw', isa => 'Int', default => 0 ); 
 
 
+
 sub init {
 	my ($self) = @_;
 	$self->SUPER::init();
@@ -60,6 +61,26 @@ sub buy {
 	$choice->add($option1);
 	$choice->add($option2);
 	$self->player->emit('sendmessage',$choice);
+}
+
+sub attack {
+    my ($self, $player, $state, $attack) = @_;
+
+    return $attack->done if $attack->cancelled;
+
+	if ($player->hand->cards_of_type('reaction')) {
+		$self->player->currentinteraction($attack);
+		#Send a choice to the player 
+		my $choice = Dominion::Com::Messages::Choice->new(message => 'Attack Reaction' );
+		my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'interactionfinish', name=>"Finished reacting");
+		my $option2 = Dominion::Com::Messages::Options::Play->new(event => 'interactioncard',cards => [$player->hand->cards_of_type('reaction')]);
+		
+		$choice->add($option1);
+		$choice->add($option2);
+		$self->player->emit('sendmessage',$choice);		
+	} else {
+		return $attack->done;
+	}
 }
 
 sub send_hand {

@@ -12,11 +12,12 @@ sub play {
     my $card = $self->player->hand->card_by_name($card_name);
 
     $card->reaction($self->player, $self->player->game, $self);
+    $self->player->game->send_to_everyone(Dominion::Com::Messages::CardPlayed->new(actiontype => 'witchresolve', card=>$card, player=>$self->player));
 }
 
 sub cancel {
     my ($self) = @_;
-
+	$self->resolved(1);
     $self->cancelled(1);
 }
 

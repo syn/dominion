@@ -16,6 +16,7 @@ has 'discard'   => ( is => 'ro', isa => 'Dominion::Set', default => sub { Domini
 has 'game'      => ( is => 'rw', isa => 'Dominion::Game', default => undef );
 has 'isbot'     => ( is => 'rw', isa => 'Bool', default => 0 );
 has 'hasticked' => ( is => 'rw', isa => 'Bool', default => 0 );
+has 'currentinteraction' => (is => 'rw' , isa => 'Dominion::Interaction');
 
 subtype 'TurnState'
   => as 'Str'
@@ -137,9 +138,13 @@ sub play {
     die "$card_name is not an action card" unless $card->is('action');
 
     $self->playarea->add($card);
+    $self->emit('playedcard',$card);
     $self->actions($self->actions - 1);
+    print "Calling action " .$card->name . "\n";
     $card->action($self, $self->game);
-	$self->emit('playedcard',$card);
+    print "finished action " .$card->name . "\n";
+    #TODO move this buy_phase check somewhere else?
+    #What if an delayed reaction gives us more stuff?
     $self->buy_phase if $self->actions == 0 or $self->hand->grep(sub { $_->is('action') }) == 0;
 }
 

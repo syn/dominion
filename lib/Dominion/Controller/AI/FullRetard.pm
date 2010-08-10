@@ -40,5 +40,10 @@ sub init {
 	});
 }	
 
+sub attack {
+    my ($self, $player, $game, $attack) = @_;
+    $attack->done();
+}
+
 #__PACKAGE__->meta->make_immutable;
 1;

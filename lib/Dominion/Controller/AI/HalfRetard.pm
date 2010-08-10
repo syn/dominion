@@ -82,7 +82,7 @@ sub attack {
 
     return $attack->done if $attack->cancelled;
 
-    return $attack->play('Moat') if $player->hand->card_by_name('Moat');
+    $attack->play('Moat') if $player->hand->card_by_name('Moat');
 
     return $attack->done;
 }

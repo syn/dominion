@@ -83,12 +83,10 @@ websocket '/' => sub {
 					when ('startgame')  {
 						#Send everyone a message telling them that game has started.
 						$player->game->send_to_everyone(Dominion::Com::Messages::StartGame->new());
-						
 						$player->game->start;
 						gametick($game);
 						#add a listener to send a new supply out to everyone if it changes
 						$game->supply->add_listener('remove',sub {$player->game->send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply));});
-						
 					}
 					when ('choiceresponse') {
 						given($message->{'event'}) {
@@ -97,7 +95,6 @@ websocket '/' => sub {
 								gametick($game);
 								return;
 							}
-							
 							when ('finishturn') {
 								$player->cleanup_phase;
 								gametick($game);
@@ -113,6 +110,20 @@ websocket '/' => sub {
 								gametick($game);
 								return;
 							}
+							when ('interactionfinish') {
+								$player->currentinteraction->done;
+								#do I need to tick here?
+								return;
+							}
+							when ('interactioncard') {
+								$player->currentinteraction->play($message->{'card'});
+								$player->currentinteraction->done;
+								#do I need to tick here?
+								return;
+							}
+							
+							
+							
 							default {print Dumper($message);}
 						}
 					}			
@@ -142,7 +153,6 @@ sub player_connected {
 
 	#Send some game state.
 	$player->emit('sendmessage',Dominion::Com::Messages::InitialSetup->new(gamestatus => $game->state , name => $player->name));
-    
 	#Send everyone else a message that the player joined the game.
 	$player->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$player));
 	#Send this player a message about everyone else who is in the game
@@ -156,6 +166,7 @@ sub player_connected {
 
 sub chat_message {
 	my ($game,$player,$incomingmessag) = @_;
+	$game->tick;
 	$game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => $incomingmessag->{'message'} , from => $player->name));
 }
 
@@ -170,10 +181,17 @@ my $loop = Mojo::IOLoop->singleton;
 my $id = $loop->timer(0.25 => \&tick);
 
 sub tick {
+	
 	if( $game->state ne 'postgame' && $game->state ne 'pregame' && ($game->active_player->isbot || $game->active_player->hasticked == 0))  {
-		$game->tick;
+		print "tick\n";
+		$game->tick;	
 	} 
+	if ( $game->state eq 'postgame' && $game->resultssent == 0) {
+		$game->resultssent(1);
+		$game->emit('postgame');
+	}
 	$id = $loop->timer(0.5 => \&tick);
+	
 }
 
 get '/' => 'index';
