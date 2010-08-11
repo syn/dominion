@@ -89,6 +89,7 @@ websocket '/' => sub {
 						$game->supply->add_listener('remove',sub {$player->game->send_to_everyone(Dominion::Com::Messages::Supply->new(supply => $game->supply));});
 					}
 					when ('choiceresponse') {
+						$player->game->outstandingchoices($player->game->outstandingchoices-1);
 						given($message->{'event'}) {
 							when ('cardbrought') {
 								$player->buy($message->{'card'});
@@ -121,9 +122,6 @@ websocket '/' => sub {
 								#do I need to tick here?
 								return;
 							}
-							
-							
-							
 							default {print Dumper($message);}
 						}
 					}			
@@ -182,7 +180,7 @@ my $id = $loop->timer(0.25 => \&tick);
 
 sub tick {
 	
-	if( $game->state ne 'postgame' && $game->state ne 'pregame' && ($game->active_player->isbot || $game->active_player->hasticked == 0))  {
+	if( $game->state ne 'postgame' && $game->state ne 'pregame' && $game->outstandingchoices == 0)  {
 		print "tick\n";
 		$game->tick;	
 	} 
@@ -190,7 +188,7 @@ sub tick {
 		$game->resultssent(1);
 		$game->emit('postgame');
 	}
-	$id = $loop->timer(0.5 => \&tick);
+	$id = $loop->timer(0.25 => \&tick);
 	
 }
 

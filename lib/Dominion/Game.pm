@@ -39,6 +39,7 @@ has 'supply' => ( is => 'ro', isa => 'Dominion::Set::Supply', default => sub { D
 has 'trash' => ( is => 'ro', isa => 'Dominion::Set', default => sub { Dominion::Set->new } );
 has 'inplay' => ( is => 'rw', isa => 'Bool', default => 0 );
 has '_sequence' => ( is  => 'rw', isa => 'Int', default => 0 );
+has 'outstandingchoices' => ( is  => 'rw', isa => 'Int', default => 0 );
 has 'resultssent' => ( is => 'rw', isa => 'Bool', default => 0 );
 
 sub sequence_reset { shift->_sequence(0) }
@@ -132,7 +133,7 @@ sub tick {
                     }
                 }
             }
-            when ( 'interaction' ) {
+            when ( 'postgame' ) {
             	#Do nothing 	
             }
             default {

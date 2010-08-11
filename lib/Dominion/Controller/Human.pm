@@ -43,6 +43,7 @@ sub action {
 	$choice->add($option1);
 	$choice->add($option2);
 	$self->player->emit('sendmessage',$choice);
+	$self->player->game->outstandingchoices($self->player->game->outstandingchoices+1);
 }
 
 sub buy {
@@ -61,6 +62,7 @@ sub buy {
 	$choice->add($option1);
 	$choice->add($option2);
 	$self->player->emit('sendmessage',$choice);
+	$self->player->game->outstandingchoices($self->player->game->outstandingchoices+1);
 }
 
 sub attack {
@@ -78,6 +80,7 @@ sub attack {
 		$choice->add($option1);
 		$choice->add($option2);
 		$self->player->emit('sendmessage',$choice);		
+		$self->player->game->outstandingchoices($self->player->game->outstandingchoices+1);
 	} else {
 		return $attack->done;
 	}
