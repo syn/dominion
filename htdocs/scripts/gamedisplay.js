@@ -254,3 +254,38 @@ function updateLocalCardPlayed(card,actiontype) {
 	$(alink).flyout();
 	prunePlayArea();
 }
+
+function drawGameArea() {
+	$('body').html("<div id='supply'></div>" +
+	"<div id='chat'>" +
+	"	<div id='chatdisplay'></div>" +
+	"	<section id='chatname' contenteditable='true'></section>" +
+	"	<form onsubmit='sendChatMessage(); return false;' id='messageform'>" +
+    "		<input  type='text' id='message-box'>" +
+	"	</form>" +
+	"</div>" +
+	"<div id='discard'>" +
+	"	<div class='info'>" +
+	"		<h2>Discard</h2>" +
+	"	</div>" +
+	"</div>" +
+	"<div id='play'>" +
+	"	<div class='info'>" +
+	"		<h2>Play</h2>" +
+	"		<div id='playstatus'>Status :</div>" +
+	"	</div>" +
+	"	<div id='playedcards'></div>" +
+	"</div>" +
+	"<div id='hand'>" +
+	"</div>" +
+	"<div id='trash'>" +
+	"	<div class='info'>" +
+	"		<h2>Trash</h2>" +
+	"	</div>" +
+	"</div>" +
+	"<div id='control'>" +
+	"	<h3>Control</h3>" +
+	"	<p>Player List:</p>" +
+	"	<ul id='playerstatus'></ul>" +
+	"</div>");
+}

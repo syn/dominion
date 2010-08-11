@@ -7,6 +7,7 @@ has '+type'      => default => 'cardplayed';
 has 'actiontype' => ( isa => 'Str', is => 'rw', required => 1 );
 has 'player'     => ( isa => 'Dominion::Player', is => 'rw', required => 1 );
 has 'card'       => ( isa => 'Dominion::Card', is => 'rw' , required => 1);
+has 'section'    => ( isa => 'Str', is => 'ro', default => 'game');
 
 
 # For sending a chat message back to the client
@@ -17,7 +18,8 @@ sub TO_JSON {
 		actiontype=> $self->actiontype,
 		playerid  => $self->player->id,
 		name      => $self->player->name,
-		card      => $self->card,		
+		card      => $self->card,	
+		section   => $self->section,	
 	};
 }
 1;

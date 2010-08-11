@@ -16,6 +16,7 @@ has 'options' => (
         get      => 'get',
     },
 );
+has 'section'    => ( isa => 'Str', is => 'ro', default => 'game');
 # For sending a chat message back to the client
 
 sub TO_JSON {
@@ -24,6 +25,7 @@ sub TO_JSON {
 		type => $self->type,
 		message =>  $self->message,
 		choice => [$self->options],
+		section   => $self->section,
 	};
 }
 1;

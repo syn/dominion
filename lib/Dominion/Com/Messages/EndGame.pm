@@ -12,6 +12,7 @@ has 'results' => (
         results    => 'elements',
     }
 );
+has 'section'    => ( isa => 'Str', is => 'ro', default => 'game');
 
 
 
@@ -20,7 +21,8 @@ sub TO_JSON {
 	my ($self) = @_;
 	return {
 		type      => $self->type,
-		results   => [$self->results],		
+		results   => [$self->results],	
+		section   => $self->section,	
 	};
 }
 1;

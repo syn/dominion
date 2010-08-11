@@ -164,7 +164,6 @@ sub player_connected {
 
 sub chat_message {
 	my ($game,$player,$incomingmessag) = @_;
-	$game->tick;
 	$game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => $incomingmessag->{'message'} , from => $player->name));
 }
 
