@@ -1,6 +1,9 @@
 package Dominion::Lobby;
 
 use Moose;
+use Mojo::IOLoop;
+use Dominion::Controller::Human;
+use Dominion::Game;
 
 has 'players' => (
     traits   => ['Array'],
@@ -29,6 +32,93 @@ has 'games' => (
         games_delete   => 'delete',
     },
 );
+
+sub create_game {
+	my ($self,$player,$message) = @_;
+	my $game = Dominion::Game->new;
+	$self->games_add($game);
+	$game->add_listener('postgame', sub {
+	    my @results;
+		foreach my $player ( $game->players ) {
+			my $vp = $player->deck->total_victory_points;
+			my $res = {	name   =>  $player->name, vp => $vp };
+			foreach my $card ( $player->deck->cards ) {
+		    	next unless $card->is('victory') or $card->is('curse');
+		        $res->{$card->name}++;
+	        }
+			push (@results , $res);
+		}
+		$game->send_to_everyone(Dominion::Com::Messages::EndGame->new(results => [@results]));
+		#Remove any supply listener updates that have been added, so we don't spam clients if the game is restarted and the supply is cleared.
+		$game->supply->remove_all_listeners('remove');
+	});
+	
+	
+	use Dominion::Controller::AI::FullRetard;
+	use Dominion::Controller::AI::HalfRetard;
+	use Dominion::Controller::AI::MoneyWhore;
+	use Dominion::Controller::AI::DumbMoney;
+
+	foreach my $AI ( qw(MoneyWhore FullRetard HalfRetard) ) {
+    my $player = Dominion::Player->new(name => $AI);
+    $game->player_add($player);
+    "Dominion::Controller::AI::$AI"->new(player => $player);
+	}
+	return $game;
+	
+}
+sub join_game {
+	my ($self,$game,$player) = @_;
+	
+	$game->player_add($player);
+    Dominion::Controller::Human->new(player => $player);
+	player_connected($game,$player);
+}
+	
+
+
+sub available_AI {
+	
+	
+}
+
+sub start {
+	my ($self) = @_;
+	$self->tick;
+}
+
+
+my $loop = Mojo::IOLoop->singleton;
+
+sub tick {
+	my ($self) = @_;
+	foreach my $game ($self->games) {
+		if( $game->state ne 'postgame' && $game->state ne 'pregame' && $game->outstandingchoices == 0)  {
+			print "tick\n";
+			$game->tick;	
+		} 
+		if ( $game->state eq 'postgame' && $game->resultssent == 0) {
+			$game->resultssent(1);
+			$game->emit('postgame');
+		}
+	}
+	$loop->timer(0.25 => sub {$self->tick;});
+}
+
+sub player_connected {
+	my ($game,$player) = @_;
+
+	#Send some game state.
+	$player->emit('sendmessage',Dominion::Com::Messages::InitialSetup->new(gamestatus => $game->state , name => $player->name));
+	#Send everyone else a message that the player joined the game.
+	$player->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$player));
+	#Send this player a message about everyone else who is in the game
+	 foreach my $otherplayer ( $player->game->players ) {
+     	if($player!=$otherplayer) {
+     		$player->emit('sendmessage',Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$otherplayer));
+     	}
+    }
+}
 
 #__PACKAGE__->meta->make_immutable;
 1;

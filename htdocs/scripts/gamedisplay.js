@@ -256,7 +256,7 @@ function updateLocalCardPlayed(card,actiontype) {
 }
 
 function drawGameArea() {
-	$('body').html("<div id='supply'></div>" +
+	$('#container').html("<div id='supply'></div>" +
 	"<div id='chat'>" +
 	"	<div id='chatdisplay'></div>" +
 	"	<section id='chatname' contenteditable='true'></section>" +

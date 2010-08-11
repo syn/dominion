@@ -8,6 +8,7 @@ with 'Dominion::EventEmitter';
 use Dominion::Set::Supply;
 use Dominion::Player;
 use Dominion::Interaction::Attack;
+use Digest::MD5 qw(md5_hex);
 
 has 'players' => (
     traits   => ['Array'],
@@ -41,6 +42,7 @@ has 'inplay' => ( is => 'rw', isa => 'Bool', default => 0 );
 has '_sequence' => ( is  => 'rw', isa => 'Int', default => 0 );
 has 'outstandingchoices' => ( is  => 'rw', isa => 'Int', default => 0 );
 has 'resultssent' => ( is => 'rw', isa => 'Bool', default => 0 );
+has 'id'        => ( is => 'ro', isa => 'Str', default => sub { substr(md5_hex(rand),0,8) } );
 
 sub sequence_reset { shift->_sequence(0) }
 sub sequence {
