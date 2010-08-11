@@ -241,3 +241,16 @@ img.card {
 	text-align:center;
 	width:15px;
 }
+
+#results table {
+	border-collapse:collapse;
+	margin-left:50px;
+}
+
+#results table td {
+	padding:5px;
+}
+#results table th {
+	padding:5px;
+	text-align:left;
+}

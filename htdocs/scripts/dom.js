@@ -138,12 +138,24 @@ function init() {
 			//Build up the player results list.
 			$('#hand').html('');
 			$('#supply').html("<h1>Game Over</h1>" );
+			var res = "<table><tr><th>Name</th><th>Estate</th><th>Duchy</th><th>Province</th><th>Gardens</th><th>Curse</th><th>Total</th></tr>";
 			for ( var i in com.results )
 			{
-				var resultp = document.createElement('p');
-				resultp.innerHTML=com.results[i].name + " score : "+ com.results[i].vp;
-				$('#supply').append(resultp);
+				res += "<tr>";
+				res += "<td>" + com.results[i].name + "</td>";
+				res += "<td>" + (com.results[i].Estate ? com.results[i].Estate : 0) + "</td>";
+				res += "<td>" + (com.results[i].Duchy ? com.results[i].Duchy : 0) + "</td>";
+				res += "<td>" + (com.results[i].Province ? com.results[i].Province : 0)  + "</td>";
+				res += "<td>" + (com.results[i].Gardens ? com.results[i].Gardens : 0)  + "</td>";
+				res += "<td>" + (com.results[i].Curse ? com.results[i].Curse : 0) + "</td>";
+				res += "<td>" + com.results[i].vp + "</td>";
+				res += "</tr>";	
 			}
+			res += "</table>";
+			var resultdiv = document.createElement('div');
+			resultdiv.setAttribute("id", "results");
+			resultdiv.innerHTML = res;
+			$('#supply').append(resultdiv);
 			gameover = true; 
 			console.log('setting supply to null');
 			supply = null;
