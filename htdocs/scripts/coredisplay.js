@@ -60,7 +60,6 @@ function shownewsupply() {
 //Remove any fade effects in place
 function showsupply() {
 	$('#supplycards .card').each(function(index,value) {
-		$(value).fadeTo('fast', 1);
 		$(value).draggable('destroy');
 		//Look for this card in the supply
 		var found = -1;
@@ -71,11 +70,12 @@ function showsupply() {
 			}
 		}
 		if( found != -1) {
+			$(value).fadeTo('fast', 1);
 			//update the card count
 			$('#supplycount-'+supply[found].name).html(+supply[found].available);
 		} else {
 			//The card wasn't found, must have been removed from the supply
-			$(value).attr('src','./images/empty.jpg');
+			$(value).fadeTo('fast', 0.1);
 			$(value).parent().next().html(0);
 		}
 	});
