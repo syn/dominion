@@ -24,6 +24,7 @@ var statusbackup = "";  // used when I have to temporarily replace the status me
 var gameover = false;
 function init() {
 	drawLobby();
+	
 	if (localStorage.getItem('playername')) {
 		$('#chatname').html(localStorage.getItem('playername'));
 	}
@@ -37,6 +38,7 @@ function init() {
 		if (localStorage.getItem('playername')) {
 			changename(localStorage.getItem('playername'));
 		}
+		requestlistofgames();
 	}
 	// Receive message
 	ws.onmessage = function(e) {

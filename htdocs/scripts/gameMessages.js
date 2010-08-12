@@ -14,6 +14,7 @@ function processGameMessage(com) {
 		return;
 	}
 	if (com.type =='InitialSetup') {
+		drawGameArea();
 		var message = document.createElement('div');
 		message.appendChild(document.createTextNode("Initial Setup recived"));
 		var display = document.getElementById('chatdisplay');

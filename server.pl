@@ -34,12 +34,12 @@ websocket '/' => sub {
 	# Receive message
 	$websocketController->receive_message(
 		sub {
-			eval { 
+			#eval { 
 				
-				local $SIG{__DIE__} = sub { 
-					my ($error) = @_;
-					$player->game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => 'ERROR processing ' . $player->name . ' : ' . $error, from => 'Server'));
-		    	};
+				#local $SIG{__DIE__} = sub { 
+				#	my ($error) = @_;
+				#	$player->game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => 'ERROR processing ' . $player->name . ' : ' . $error, from => 'Server'));
+		    	#};
 				my ( $self, $rawmessage ) = @_;
 				my $message = decode_json($rawmessage);
 				given($message->{'type'}) {
@@ -48,6 +48,16 @@ websocket '/' => sub {
 					when ('creategame') {
 						my $game = $lobby->create_game($player,$message);
 						$lobby->join_game($game,$player);
+						return;
+					}
+					when ('joingame') {
+						my $game = $lobby->getgame($message->{'gameid'});
+						$lobby->join_game($game,$player);
+						return;
+					}
+					when ('listofgames') {
+						print "Got a request for a list of games\n";
+						$lobby->sendlistofgames($player);
 						return;
 					}
 					when ('startgame')  {
@@ -99,15 +109,16 @@ websocket '/' => sub {
 					default {print Dumper($message);}
 				}			
 			}
-		}
+		#}
 	);
 		
 	# Finished
 	$websocketController->finished(
 		sub {
-			
-			$player->game->send_to_everyone_else(Dominion::Com::Messages::PlayerStatus->new(action => 'quit' ,player=>$player));
-			$player->game->player_remove($player);			
+			if($player->game) {			
+				$player->game->send_to_everyone_else(Dominion::Com::Messages::PlayerStatus->new(action => 'quit' ,player=>$player));
+				$player->game->player_remove($player);
+			}			
 		}
 	);
 };
@@ -125,7 +136,9 @@ sub chat_message {
 sub name_change {
 	my ($player, $n) = @_;
 	$player->name($n);
-	$player->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'namechange' ,  player => $player)); 
+	if($player->game) {
+		$player->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'namechange' ,  player => $player));
+	} 
 }
 
 get '/' => 'index';

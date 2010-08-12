@@ -2,8 +2,15 @@ function creategame() {
 	this.type = "creategame";
 }
 
-function processLobbyMessage() {
-	
+function processLobbyMessage(com) {
+	if (com.type == 'message') {
+		addChatMessage(com.from,com.message);
+		return;
+	}
+	if (com.type == 'listofgames') {
+		showlistofgames(com);
+		return;
+	}
 	
 }
 
@@ -17,25 +24,47 @@ function drawLobby () {
 	"	</form>" +
 	"</div>"
 	);
-	listofgames();
-}
-
-function listofgames() {
-	
 	var listdiv = document.createElement('div');
-	listdiv.innerHTML = "<h2>List of games</h2><div id='gamemenu'></div>";
+	listdiv.innerHTML = "<h2>List of games</h2><div id='gamelist'></div>";
 	$('#lobby').append(listdiv);
 	
 	var creategamebutton = document.createElement('button');
 	creategamebutton.setAttribute("type","button");
 	creategamebutton.setAttribute("id", 'creategamebutton');
 	creategamebutton.innerHTML='Create Game';
-	$('#gamemenu').append(creategamebutton);
+	$('#lobby').append(creategamebutton);
 	$('#creategamebutton').click(function() {
 		var message = new creategame();
 		ws.send(JSON.stringify(message));
-		drawGameArea();
+		
 	});
-	
-	
+}
+
+function showlistofgames(com) {
+	$('#gamelist').html('<ul></ul>');
+	for( i in com.games) {
+		var game = document.createElement('li');
+		var gamelink = document.createElement('a');
+		gamelink.innerHTML =  com.games[i].name;
+		gamelink.setAttribute('onclick','joingame\(\''+ com.games[i].id +'\'\);return false;');
+		$('#gamelist').append(game);
+		$(game).append(gamelink);
+	}
+}
+function joingame(id) {
+	var message = new joingameobj(id);
+	ws.send(JSON.stringify(message));
+}
+
+function joingameobj(param) {
+	this.type = "joingame";
+	this.gameid =  param;
+}
+function requestlistofgames () {
+	var message = new listofgames();
+	ws.send(JSON.stringify(message));
+}
+
+function listofgames() {
+	this.type = "listofgames";
 }

@@ -43,6 +43,8 @@ has '_sequence' => ( is  => 'rw', isa => 'Int', default => 0 );
 has 'outstandingchoices' => ( is  => 'rw', isa => 'Int', default => 0 );
 has 'resultssent' => ( is => 'rw', isa => 'Bool', default => 0 );
 has 'id'        => ( is => 'ro', isa => 'Str', default => sub { substr(md5_hex(rand),0,8) } );
+has 'name'       => ( is => 'rw', isa => 'Str', default => 'New Game');
+
 
 sub sequence_reset { shift->_sequence(0) }
 sub sequence {
@@ -226,6 +228,17 @@ sub send_to_everyone_else {
 			$otherplayer->emit('sendmessage',$message);
 		}
 	}
+}
+
+
+sub TO_JSON {
+	my ($self) = @_;
+	print "Game to Json\n";
+	return {
+		name => $self->name,
+		playercount =>  $self->player_count,
+		id => $self->id,
+	};
 }
 
 #__PACKAGE__->meta->make_immutable;
