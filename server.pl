@@ -13,12 +13,10 @@ use Data::Dumper;
 use Dominion::Lobby;
 use Dominion::Com::Messages;
 
-
 my $lobby = Dominion::Lobby->new;
 $lobby->start;
 
 my $playercount = 0; #The number of players we have seen so far, only used for sequential initial names
-
 
 websocket '/' => sub {
 	my $websocketController = shift;

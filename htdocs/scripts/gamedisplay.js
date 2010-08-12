@@ -288,4 +288,8 @@ function drawGameArea() {
 	"	<p>Player List:</p>" +
 	"	<ul id='playerstatus'></ul>" +
 	"</div>");
+	
+	$('#chatname').blur(function() {
+		changename(this.innerHTML);
+	});
 }

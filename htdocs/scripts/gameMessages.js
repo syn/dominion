@@ -22,10 +22,10 @@ function processGameMessage(com) {
 		
 		if (localStorage.getItem('playername')) {
 			changename(localStorage.getItem('playername'));
-		} else {
-			var display = document.getElementById('chatname');
-			display.innerHTML = com.name;
-		}
+		} 
+		var display = document.getElementById('chatname');
+		display.innerHTML = com.name;
+		
 		if(com.gamestatus == 'pregame') {
 			addStartButton();
 		}

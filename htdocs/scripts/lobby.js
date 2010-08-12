@@ -38,6 +38,9 @@ function drawLobby () {
 		ws.send(JSON.stringify(message));
 		
 	});
+	$('#chatname').blur(function() {
+		changename(this.innerHTML);
+	});
 }
 
 function showlistofgames(com) {

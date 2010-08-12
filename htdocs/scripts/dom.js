@@ -56,9 +56,7 @@ function init() {
 		
 		//addChatMessage('Debug',e.data);
 	};	
-	$('#chatname').blur(function() {
-		changename(this.innerHTML);
-	});
+	
 }
 
 window.onload = init;

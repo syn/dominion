@@ -36,6 +36,7 @@ has 'games' => (
 sub create_game {
 	my ($self,$player,$message) = @_;
 	my $game = Dominion::Game->new;
+	$game->name($player->name. "'s game");
 	$self->games_add($game);
 	$game->add_listener('postgame', sub {
 	    my @results;
