@@ -24,6 +24,7 @@ websocket '/' => sub {
 	#create a new player..
 	$playercount++; #Bump up the player count
 	my $player = Dominion::Player->new(name => 'Player' . $playercount);
+	$lobby->player_add($player);
 	$player->add_listener('sendmessage',  sub {
 		my($player,$message) = @_;	
 		my $json = JSON->new->utf8;
@@ -41,7 +42,7 @@ websocket '/' => sub {
 				my ( $self, $rawmessage ) = @_;
 				my $message = decode_json($rawmessage);
 				given($message->{'type'}) {
-					when ('message')    {chat_message($player->game,$player,$message);}
+					when ('message')    {chat_message($lobby,$player,$message);}
 					when ('namechange') {name_change($player,$message->{'name'});}
 					when ('creategame') {
 						my $game = $lobby->create_game($player,$message);
@@ -116,6 +117,7 @@ websocket '/' => sub {
 			if($player->game) {			
 				$player->game->send_to_everyone_else(Dominion::Com::Messages::PlayerStatus->new(action => 'quit' ,player=>$player));
 				$player->game->player_remove($player);
+				$lobby->player_remove($player);
 			}			
 		}
 	);
@@ -127,8 +129,12 @@ sub gametick {
 }
 
 sub chat_message {
-	my ($game,$player,$incomingmessag) = @_;
-	$game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => $incomingmessag->{'message'} , from => $player->name));
+	my ($lobby,$player,$incomingmessag) = @_;
+	#if($incomingmessag->{'area'} eq 'game') {
+	#	$player->game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => $incomingmessag->{'message'} , from => $player->name));
+	#} else {
+		$lobby->send_to_everyone(Dominion::Com::Messages::Chat->new(section => 'lobby', message => $incomingmessag->{'message'} , from => $player->name));
+	#}
 }
 
 sub name_change {

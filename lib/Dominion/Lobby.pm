@@ -153,5 +153,20 @@ sub getgame {
 	} 
 }
 
+sub player_remove {
+	my ($self,$player) = @_;
+	my $i;
+	for ( $i = 0; $i < $self->player_count; $i++ ) {
+        last if $self->player_number($i) == $player;
+    }
+	$self->player_delete($i);
+}
+
+sub send_to_everyone {
+	my ($self,$message) = @_;
+	foreach my $player ($self->players) {
+		$player->emit('sendmessage',$message);
+	}
+}
 #__PACKAGE__->meta->make_immutable;
 1;

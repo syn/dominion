@@ -19,7 +19,7 @@ function drawLobby () {
 	"<div id='chat'>" +
 	"	<div id='chatdisplay'></div>" +
 	"	<section id='chatname' contenteditable='true'></section>" +
-	"	<form onsubmit='sendChatMessage(); return false;' id='messageform'>" +
+	"	<form onsubmit=\"sendChatMessage('lobby'); return false;\" id='messageform'>" +
     "		<input  type='text' id='message-box'>" +
 	"	</form>" +
 	"</div>"

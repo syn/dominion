@@ -1,11 +1,12 @@
-function messageobj(parameter) {
+function messageobj(parameter,a) {
 	this.type = "message";
+	this.area = a;
 	this.message = parameter;
 }
 
-function sendChatMessage() {
+function sendChatMessage(area) {
 	var input = document.getElementById('message-box');
-	var message = new messageobj(input.value);
+	var message = new messageobj(input.value,area);
 	var myJSONText = JSON.stringify(message);
 	// Send message
 	ws.send(myJSONText);
