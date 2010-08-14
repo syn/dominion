@@ -239,6 +239,7 @@ sub TO_JSON {
 		name => $self->name,
 		playercount =>  $self->player_count,
 		id => $self->id,
+		state => $self->state,
 	};
 }
 
