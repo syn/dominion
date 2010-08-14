@@ -135,12 +135,7 @@ sub player_connected {
 }
 sub sendlistofgames {
 	my ($self,$player) = @_;
-	print "Sending list to ". $player->name ."\n";
 	my $json = JSON->new->utf8;
-	#print $json->convert_blessed->encode($self->games) . "\n";
-	print "done\n";
-	#$player->emit('sendmessage',Dominion::Com::Messages::PlayerStatus->new(action => 'joined' ,player=>$player));
-	print $self->games_count ."\n";
 	if($self->games_count > 0) {
 		$player->emit('sendmessage',Dominion::Com::Messages::ListofGames->new(games => [$self->games]));
 	} else {
