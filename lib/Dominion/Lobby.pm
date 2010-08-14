@@ -33,6 +33,19 @@ has 'games' => (
     },
 );
 
+after games_add => sub {
+	my ($self, $game) = @_;
+	$game->add_listener('playerquit' , sub {
+		#Check to see if we need to removee this game from the lobby
+		foreach my $player ($game->players) {
+			if (!$player->isbot) {
+				return;
+			}
+		}
+		$self->games_delete($game);
+		
+	});
+};
 sub create_game {
 	my ($self,$player,$message) = @_;
 	my $game = Dominion::Game->new;
