@@ -78,5 +78,13 @@ sub attack {
     $attack->done();
 }
 
+sub freebuy {
+    my ($self, $player, $game, $interaction) = @_;
+    my @cards =  $interaction->cards;
+    my $card = @cards[int rand() * @cards];
+    $interaction->play($card->name);
+    $interaction->done;
+}
+
 #__PACKAGE__->meta->make_immutable;
 1;

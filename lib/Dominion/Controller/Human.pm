@@ -86,9 +86,23 @@ sub attack {
 	}
 }
 
+sub freebuy {
+    my ($self, $player, $game, $interaction) = @_;
+    $self->player->currentinteraction($interaction);
+    my $choice = Dominion::Com::Messages::Choice->new(message => $interaction->message );
+	my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'interactionfinish', name=>"Finished reacting");
+	my $option2 = Dominion::Com::Messages::Options::Buy->new(event => 'interactioncard',cards => [$interaction->cards],reveal => 'false');
+	$choice->add($option1);
+	$choice->add($option2);
+	$self->player->emit('sendmessage',$choice);		
+	$self->player->game->outstandingchoices($self->player->game->outstandingchoices+1);
+}
+
 sub send_hand {
 	my ($self) = @_;	
 	$self->player->emit('sendmessage',Dominion::Com::Messages::Hand->new(cards => $self->player->hand));
 }
+
+
 #__PACKAGE__->meta->make_immutable;
 1;

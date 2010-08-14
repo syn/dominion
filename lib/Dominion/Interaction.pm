@@ -8,6 +8,8 @@ has 'id'       => ( is => 'ro', isa => 'Int', default => sub { $interaction_id++
 has 'resolved' => ( is => 'rw', isa => 'Bool', default => 0 );
 has 'player'   => ( is => 'rw', isa => 'Dominion::Player' );
 has 'callback' => ( is => 'rw', isa => 'CodeRef' );
+has 'message' => ( is => 'rw', isa => 'Str' ,default => '');
+
 
 sub done {
     my ($self) = @_;

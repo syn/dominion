@@ -91,7 +91,7 @@ sub start {
     foreach my $player ( $self->players ) {
         $player->reset;
         $player->deck->add($self->supply->card_by_name('Copper')) for 1..7;
-        $player->deck->add($self->supply->card_by_name('Estate')) for 1..3;
+        $player->deck->add($self->supply->card_by_name('Estate')) for 1..3;        
         $player->deck->shuffle;
         $player->hand->add($player->deck->draw(5));
         $player->actions(1);
@@ -212,7 +212,6 @@ sub attack {
         ));
         return;
     }
-
     $callback->();
 }
 

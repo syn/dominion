@@ -77,7 +77,10 @@ sub interaction {
     match_on_type $interaction => (
         'Dominion::Interaction::Attack' => sub {
             $self->attack($player, $state, $interaction);
-        }
+        },
+        'Dominion::Interaction::FreeBuy' => sub {
+            $self->freebuy($player, $state, $interaction);
+        },
         => sub {
             die "Can't deal with interaction: " . ref $interaction;
         },
@@ -86,8 +89,11 @@ sub interaction {
 
 sub attack {
     my ($self, $player, $state, $attack) = @_;
-
     die "Need to implement attack";
+}
+
+sub freebuy {
+    die "Need to implement freebuy";
 }
 
 #__PACKAGE__->meta->make_immutable;

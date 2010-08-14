@@ -71,7 +71,6 @@ sub init {
         my $count = $kingdom->is('victory') ? $card_count_for{'Dominion::Cards::Province'} : 10;
         $self->add(map { (ref $kingdom)->new } 1..$count);
     }
-
     my $initial_piles = $self->initial_piles({});
     foreach my $card ( $self->cards ) {
         $initial_piles->{$card->name} //= 0;
