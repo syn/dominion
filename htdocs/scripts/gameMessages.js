@@ -93,7 +93,6 @@ function processGameMessage(com) {
 	}
 	if (com.type == 'endgame') {
 		//Game over man.
-		addChatMessage('Debug','Game over -' + e.data);
 		//Build up the player results list.
 		$('#hand').html('');
 		$('#supply').html("<h1>Game Over</h1>" );

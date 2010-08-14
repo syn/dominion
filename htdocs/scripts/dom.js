@@ -29,7 +29,7 @@ function init() {
 		$('#chatname').html(localStorage.getItem('playername'));
 	}
 	// Connect to Web Socket.
-	ws = new WebSocket('ws://localhost:3000');
+	ws = new WebSocket('ws://dominion.lawn.net.nz:3000');
 	
 	ws.onclose = function (event) {
 		addChatMessage("Your browser","The server seems to have up and quit on us!");
