@@ -128,7 +128,6 @@ sub tick {
                     player  => $self->active_player,
                     id      => $self->sequence,
                 };
-                $self->active_player->hasticked(1);
             }
             when ( 'interaction' ) {
             	$self->remove_resolved_interactions;
@@ -233,10 +232,8 @@ sub send_to_everyone_else {
 	}
 }
 
-
 sub TO_JSON {
 	my ($self) = @_;
-	print "Game to Json\n";
 	return {
 		name => $self->name,
 		playercount =>  $self->player_count,
