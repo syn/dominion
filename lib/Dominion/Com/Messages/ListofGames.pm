@@ -21,7 +21,6 @@ has 'games' => (
 # For sending a chat message back to the client
 sub TO_JSON {
 	my ($self) = @_;
-	print "In ListOfGames json\n";
 	return {
 		type      => $self->type,
 		games   => [$self->games],	

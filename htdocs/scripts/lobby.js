@@ -48,8 +48,12 @@ function showlistofgames(com) {
 	for( i in com.games) {
 		var game = document.createElement('li');
 		var gamelink = document.createElement('a');
-		gamelink.innerHTML =  com.games[i].name;
-		gamelink.setAttribute('onclick','joingame\(\''+ com.games[i].id +'\'\);return false;');
+		
+		gamelink.innerHTML =  com.games[i].name + ' - ' + com.games[i].state;
+		if (com.games[i].state == 'pregame' || com.games[i].state =='postgame') {
+			gamelink.setAttribute('onclick','joingame\(\''+ com.games[i].id +'\'\);return false;');
+			gamelink.setAttribute('href','#');
+		}
 		$('#gamelist').append(game);
 		$(game).append(gamelink);
 	}
