@@ -4,6 +4,7 @@ use Moose;
 extends 'Dominion::Com::Messages::Option';
 
 has '+type'      => default => 'play';
+has 'reveal'     => ( isa => 'Str', is => 'rw', default => "false" );
 has 'cards' => (
     traits   => ['Array'],
     isa      => 'ArrayRef[Dominion::Card]',
@@ -21,6 +22,7 @@ sub TO_JSON {
 		type => $self->type,
 		event => $self->event,
 		cards => [$self->cards],
+		reveal => $self->reveal,
 	};
 }
 1;

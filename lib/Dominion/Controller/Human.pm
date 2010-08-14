@@ -75,7 +75,7 @@ sub attack {
 		#Send a choice to the player 
 		my $choice = Dominion::Com::Messages::Choice->new(message => 'Attack Reaction' );
 		my $option1 = Dominion::Com::Messages::Options::Button->new(event => 'interactionfinish', name=>"Finished reacting");
-		my $option2 = Dominion::Com::Messages::Options::Play->new(event => 'interactioncard',cards => [$player->hand->cards_of_type('reaction')]);
+		my $option2 = Dominion::Com::Messages::Options::Play->new(event => 'interactioncard',cards => [$player->hand->cards_of_type('reaction')],reveal => 'true');
 		
 		$choice->add($option1);
 		$choice->add($option2);

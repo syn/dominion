@@ -263,9 +263,6 @@ function processGameMessage(com) {
 			                card.removeAttr("id");
 							card.removeClass("ui-draggable");
 						
-							//card.draggable("destroy");
-							//card.attr('style','');  //Jquery seems to leave a bunch of relative references around after dragging with out the clone helper.
-			            
 							updateLocalCardPlayed(card,'cardbrought');
 							
 							//Remove all the dragable stuff currently setup, it may interfer with resolving the action.
@@ -292,17 +289,22 @@ function processGameMessage(com) {
 					makehanddraggable(com.choice[i].cards);
 					handactive('action');
 					playevent = com.choice[i].event;
+					playreveal = com.choice[i].reveal == 'true';
 					$("#play").droppable({
 				        accept: '.card',
 				        drop: function(event, ui) {
-							var card = $(ui.draggable);
-			                //c.removeAttr("id");
-							//$("#playedcards").append(card);
-							
-							card.draggable("destroy");
-							card.attr('style','');  //Jquery seems to leave a bunch of relative references around after dragging with out the clone helper.
-			            
-							updateLocalCardPlayed(card,'actionplayed');
+							var card;
+							if(playreveal) {
+								card = $(ui.draggable).clone();
+								card.removeAttr("id");
+								card.removeClass("ui-draggable");
+								card.attr('style','');  //Jquery seems to leave a bunch of relative references around after dragging with out the clone helper.
+							} else {
+								card = $(ui.draggable);
+								card.draggable("destroy");
+								card.attr('style','');  //Jquery seems to leave a bunch of relative references around after dragging with out the clone helper.
+							}
+							updateLocalCardPlayed(card,playevent);
 							
 							//Remove all the dragable stuff currently setup, it may interfer with resolving the action.
 							$('#handcards').children(".card").each(function(index,value) {
@@ -314,10 +316,12 @@ function processGameMessage(com) {
 			                //Send a message off that says we just played a card.
 							//TODO make the name of the event get carried over
 							var message = new choiceresponse(playevent,hand[card.attr("cardnum")].name);
-			            	
-							//replace the card with a filler
-			                hand[card.attr("cardnum")]="played";
-			                showhand();
+							if(!playreveal) {
+								//replace the card with a filler
+								hand[card.attr("cardnum")]="played";
+								showhand();
+							}
+			                
 			                ws.send(JSON.stringify(message,hand[card.attr("cardnum")].name));
 			            	$("#tempclonecard").remove();
 			            	if( endbutton != null && endbutton != "") {
@@ -353,9 +357,6 @@ function makehanddraggable (cards) {
 	var cardsdraggable = new Array();
 	for ( var i in newarr ) {
 		$('#handcards').find(".card-"+newarr[i]).each(function(index,value) {
-			//TODO only make the cards in the choice type draggable...
-			//For chapple that dosn't matter :D
-			
 			$('#' + value.id).draggable({ 
 		        revert: 'invalid', 
 		        scroll: false,

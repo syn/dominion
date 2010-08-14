@@ -228,17 +228,11 @@ function updateLocalCardPlayed(card,actiontype) {
 		case 'cardbrought':
 			actiondiv.innerHTML = "<h4>Your buys.</h4>";
 			break;
-		case 'actionplayed':
+		case 'playcard':
 			actiondiv.innerHTML = "<h4>Your actions.</h4>";
 			break;
-		case 'witchresolve':
-			actiondiv.innerHTML = "<h4>Your witch resolution.</h4>";
-			break;
-		case 'bureaucratresolve':
-			actiondiv.innerHTML = "<h4>Your bureaucrat res.</h4>";
-			break;
-		case 'Militiaresolve':
-			actiondiv.innerHTML = "<h4>Your militia res.</h4>";
+		case 'interactioncard':
+			actiondiv.innerHTML = "<h4>Your reactions.</h4>";
 			break;
 		case 'Trash':
 			actiondiv.innerHTML = "<h4>You trashed.</h4>";
@@ -246,6 +240,8 @@ function updateLocalCardPlayed(card,actiontype) {
 		case 'Discard':
 			actiondiv.innerHTML = "<h4>You discarded.</h4>";
 			break;
+		default :
+			actiondiv.innerHTML = "<h4>You " + actiontype +"</h4>";
 		}
 		document.getElementById('playedcards').appendChild(actiondiv);
 		$("#" + lastPlayUpdate).append(alink);
