@@ -54,8 +54,8 @@ sub sequence {
 
 after 'player_add' => sub {
     my ($self, $player) = @_;
-	$self->emit('playeradd',$player);
     $player->game($self);
+    $self->emit('playeradd',$player);
 };
 
 sub player_shuffle {
@@ -76,7 +76,9 @@ sub player_remove {
         last if $self->player_number($i) == $player;
     }
 	$self->player_delete($i);
+	print "Playerquit " . $player->name . "\n";
 	$self->emit('playerquit',$player);
+
 }
 
 sub start {

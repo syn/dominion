@@ -4,6 +4,7 @@ use Moose;
 use Mojo::IOLoop;
 use Dominion::Controller::Human;
 use Dominion::Game;
+use Data::Dumper;
 
 has 'players' => (
     traits   => ['Array'],
@@ -36,14 +37,18 @@ has 'games' => (
 after games_add => sub {
 	my ($self, $game) = @_;
 	$game->add_listener('playerquit' , sub {
+		print "Got Player Quit Message\n";
 		#Check to see if we need to removee this game from the lobby
 		foreach my $player ($game->players) {
 			if (!$player->isbot) {
 				return;
 			}
 		}
-		$self->games_delete($game);
-		
+		my $i;
+		for ( $i = 0; $i < $self->games_count; $i++ ) {
+	        last if $self->games_number($i) == $game;
+	    }
+		$self->games_delete($i);
 	});
 };
 sub create_game {
