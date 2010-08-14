@@ -37,8 +37,6 @@ has 'games' => (
 after games_add => sub {
 	my ($self, $game) = @_;
 	$game->add_listener('playerquit' , sub {
-		print "Got Player Quit Message\n";
-		#Check to see if we need to removee this game from the lobby
 		foreach my $player ($game->players) {
 			if (!$player->isbot) {
 				return;
