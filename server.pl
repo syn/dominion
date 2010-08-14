@@ -33,12 +33,12 @@ websocket '/' => sub {
 	# Receive message
 	$websocketController->receive_message(
 		sub {
-			#eval { 
+			eval { 
 				
-				#local $SIG{__DIE__} = sub { 
-				#	my ($error) = @_;
-				#	$player->game->send_to_everyone(Dominion::Com::Messages::Chat->new(message => 'ERROR processing ' . $player->name . ' : ' . $error, from => 'Server'));
-		    	#};
+				local $SIG{__DIE__} = sub { 
+					my ($error) = @_;
+					$lobby->send_to_everyone(Dominion::Com::Messages::Chat->new(message => 'ERROR processing ' . $player->name . ' : ' . $error, from => 'Server'));
+		    	};
 				my ( $self, $rawmessage ) = @_;
 				my $message = decode_json($rawmessage);
 				given($message->{'type'}) {
@@ -108,7 +108,7 @@ websocket '/' => sub {
 					default {print Dumper($message);}
 				}			
 			}
-		#}
+		}
 	);
 		
 	# Finished
