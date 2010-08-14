@@ -15,7 +15,6 @@ has 'deck'      => ( is => 'ro', isa => 'Dominion::Set', default => sub { Domini
 has 'discard'   => ( is => 'ro', isa => 'Dominion::Set', default => sub { Dominion::Set->new } );
 has 'game'      => ( is => 'rw', isa => 'Dominion::Game', default => undef );
 has 'isbot'     => ( is => 'rw', isa => 'Bool', default => 0 );
-has 'hasticked' => ( is => 'rw', isa => 'Bool', default => 0 );
 has 'currentinteraction' => (is => 'rw' , isa => 'Dominion::Interaction');
 
 subtype 'TurnState'
@@ -194,7 +193,6 @@ sub cleanup_phase {
     $self->coin(0);
 
     $self->turnstate('waiting');
-    $self->hasticked(0);
     $self->game->finished_turn($self);
 }
 
@@ -239,7 +237,6 @@ sub prev_player {
 
 sub other_players {
     my ($self) = @_;
-
     return grep { $_ != $self } $self->game->players;
 }
 
