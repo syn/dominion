@@ -1,7 +1,8 @@
-function choiceresponse(parameter,card) {
+function choiceresponse(parameter,card,option) {
 	this.type = "choiceresponse";
 	this.event = parameter;
 	if(card) {this.card = card;}
+	if(option) {this.option = option;}
 }
 
 function startgame() {
@@ -127,6 +128,11 @@ function processGameMessage(com) {
 		return;
 	}
 	if(com.type == 'choice') {
+		if(com.choice[0].type == 'cardchoice') {
+			modalchoice(com);
+			return;
+		}
+		
 		//We have some kind of choice to make
 		var endbutton = "";
 		var trashevent = "";
@@ -468,4 +474,53 @@ function addStartButton() {
 		var message = new startgame();
 		ws.send(JSON.stringify(message));
 	});
+}
+
+function modalchoice(com) {
+	//Create a modal dialogue box
+	var $dialog = $('<div></div>')
+	.html('<h3>' + com.message + '</h3>')
+	.dialog({
+		autoOpen: false,
+		title: 'Basic Dialog',
+		modal: true,
+		width:'auto',
+		beforeClose: function(event, ui) { return false; },
+	});
+	
+	for ( var i in com.choice )
+	{
+		var card = com.choice[i].card
+		var $cardchoice = $("<div class='cardchoice'></div>");
+		
+		var cardimg = document.createElement('img');
+		cardimg.setAttribute("class", "card  card-" + card.name);
+		cardimg.setAttribute("src", "./images/"+card.image);
+		cardimg.setAttribute("src", "./images/"+card.image);
+		$dialog.append($cardchoice);
+		$cardchoice.append(cardimg);
+		$(cardimg).width( $('#supplycard-Copper').width());
+		$(cardimg).height( $('#supplycard-Copper').height());
+		
+		//Now draw the buttons associated with that card
+		for ( var j in com.choice[i].buttons )
+		{
+			var button = com.choice[i].buttons[j];
+			//add a button to the control area with the requested message and action.
+			var choicebutton = document.createElement('button');
+			choicebutton.setAttribute("type","button");
+			choicebutton.innerHTML=button.name;
+			choicebutton.setAttribute("data-card",card.name);
+			choicebutton.setAttribute("data-event",com.choice[i].event);
+			choicebutton.setAttribute("data-option",button.event);
+			$cardchoice.append(choicebutton);
+			$(choicebutton).click(function(event,value) {
+				var message = new choiceresponse($(this).attr('data-event'),$(this).attr('data-card'),$(this).attr('data-option'));
+				ws.send(JSON.stringify(message));
+				$dialog.dialog('close');
+				$dialog.dialog('destroy');
+			});
+		}
+	}
+	$dialog.dialog('open');
 }

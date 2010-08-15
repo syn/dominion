@@ -254,3 +254,17 @@ img.card {
 	padding:5px;
 	text-align:left;
 }
+
+.cardchoice {
+	border:1px solid grey;
+	border-radius: 5px;
+	display: inline-block;	
+	margin:4px;
+}
+.cardchoice img {
+	float:left;
+}
+.cardchoice button  {
+	float:left;
+	clear:left;	
+} 
