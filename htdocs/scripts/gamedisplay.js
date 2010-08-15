@@ -184,8 +184,8 @@ function updateCardPlayed(playerid,card,actiontype,name) {
 		case 'bureaucratresolve':
 			actiondiv.innerHTML = "<h4>" + name + "'s bureaucrat res.</h4>";
 			break;
-		case 'Militiaresolve':
-			actiondiv.innerHTML = "<h4>" + name + "'s militia res.</h4>";
+		case 'Revealed':
+			actiondiv.innerHTML = "<h4>" + name + " revealed.</h4>";
 			break;
 		case 'Trash':
 			actiondiv.innerHTML = "<h4>" + name + " trashed.</h4>";
