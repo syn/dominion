@@ -120,7 +120,14 @@ sub tick {
 
     # Unless there's a pending action, figure out some new ones
     unless ( @pending ) {
+    	
+    	
+    	
         my $state = $self->state;
+        if($state eq 'action' && ( $self->active_player->actions == 0 or $self->active_player->hand->grep(sub { $_->is('action') }) == 0)) {
+        	$self->active_player->buy_phase;
+        	return;
+        }
         given ( $state ) {
             when ( [qw(action buy)] ) {
                 push @pending, {

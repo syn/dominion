@@ -142,9 +142,10 @@ sub play {
     print "Calling action " .$card->name . "\n";
     $card->action($self, $self->game);
     print "finished action " .$card->name . "\n";
+    
     #TODO move this buy_phase check somewhere else?
     #What if an delayed reaction gives us more stuff?
-    $self->buy_phase if $self->actions == 0 or $self->hand->grep(sub { $_->is('action') }) == 0;
+    
 }
 
 sub buy_phase {
