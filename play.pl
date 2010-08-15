@@ -11,6 +11,7 @@ use Dominion::Controller::AI::FullRetard;
 use Dominion::Controller::AI::HalfRetard;
 use Dominion::Controller::AI::MoneyWhore;
 
+
 my $game = Dominion::Game->new();
 
 my %players = (
@@ -23,7 +24,7 @@ my %players = (
 foreach my $name ( keys %players ) {
     my $player = Dominion::Player->new(name => $name);
     $game->player_add($player);
-    "Dominion::AI::Controller::$players{$name}"->new(player => $player);
+    "Dominion::Controller::AI::$players{$name}"->new(player => $player);
 }
 
 $game->start;
