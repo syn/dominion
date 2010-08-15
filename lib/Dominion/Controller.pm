@@ -81,7 +81,10 @@ sub interaction {
         'Dominion::Interaction::FreeBuy' => sub {
             $self->freebuy($player, $state, $interaction);
         },
-        => sub {
+        'Dominion::Interaction::Question' => sub {
+            $self->question($player, $state, $interaction);
+        },
+        sub {
             die "Can't deal with interaction: " . ref $interaction;
         },
     );

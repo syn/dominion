@@ -78,12 +78,21 @@ sub attack {
     $attack->done();
 }
 
+
 sub freebuy {
     my ($self, $player, $game, $interaction) = @_;
     my @cards =  $interaction->cards;
     my $card = @cards[int rand() * @cards];
     $interaction->play($card->name);
     $interaction->done;
+}
+
+sub question {
+    my ($self, $player, $state, $question) = @_;
+
+    my @options = $question->options;
+    $question->choose($options[int(rand()*@options)]->key);
+    $question->done;
 }
 
 #__PACKAGE__->meta->make_immutable;

@@ -94,5 +94,13 @@ sub freebuy {
     $interaction->done;
 }
 
+sub question {
+    my ($self, $player, $state, $question) = @_;
+
+    my @options = $question->options;
+    $question->choose($options[int(rand()*@options)]->key);
+    $question->done;
+}
+
 #__PACKAGE__->meta->make_immutable;
 1;
