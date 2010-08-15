@@ -128,7 +128,7 @@ function processGameMessage(com) {
 		return;
 	}
 	if(com.type == 'choice') {
-		if(com.choice[0].type == 'cardchoice') {
+		if(com.modal == 'true') {
 			modalchoice(com);
 			return;
 		}
@@ -479,10 +479,10 @@ function addStartButton() {
 function modalchoice(com) {
 	//Create a modal dialogue box
 	var $dialog = $('<div></div>')
-	.html('<h3>' + com.message + '</h3>')
+	.html('')
 	.dialog({
 		autoOpen: false,
-		title: 'Basic Dialog',
+		title: com.message,
 		modal: true,
 		width:'auto',
 		beforeClose: function(event, ui) { return false; },
@@ -490,36 +490,57 @@ function modalchoice(com) {
 	
 	for ( var i in com.choice )
 	{
-		var card = com.choice[i].card
-		var $cardchoice = $("<div class='cardchoice'></div>");
 		
-		var cardimg = document.createElement('img');
-		cardimg.setAttribute("class", "card  card-" + card.name);
-		cardimg.setAttribute("src", "./images/"+card.image);
-		cardimg.setAttribute("src", "./images/"+card.image);
-		$dialog.append($cardchoice);
-		$cardchoice.append(cardimg);
-		$(cardimg).width( $('#supplycard-Copper').width());
-		$(cardimg).height( $('#supplycard-Copper').height());
-		
-		//Now draw the buttons associated with that card
-		for ( var j in com.choice[i].buttons )
+		switch(com.choice[i].type)
 		{
-			var button = com.choice[i].buttons[j];
-			//add a button to the control area with the requested message and action.
+		case 'button':
+			
 			var choicebutton = document.createElement('button');
 			choicebutton.setAttribute("type","button");
-			choicebutton.innerHTML=button.name;
-			choicebutton.setAttribute("data-card",card.name);
+			choicebutton.innerHTML=com.choice[i].name;
 			choicebutton.setAttribute("data-event",com.choice[i].event);
-			choicebutton.setAttribute("data-option",button.event);
-			$cardchoice.append(choicebutton);
+			choicebutton.setAttribute("data-option",com.choice[i].param);
+			$dialog.append(choicebutton);
 			$(choicebutton).click(function(event,value) {
 				var message = new choiceresponse($(this).attr('data-event'),$(this).attr('data-card'),$(this).attr('data-option'));
 				ws.send(JSON.stringify(message));
 				$dialog.dialog('close');
 				$dialog.dialog('destroy');
 			});
+			
+			break;
+		case 'cardchoice':
+			var card = com.choice[i].card
+			var $cardchoice = $("<div class='cardchoice'></div>");
+			var cardimg = document.createElement('img');
+			cardimg.setAttribute("class", "card  card-" + card.name);
+			cardimg.setAttribute("src", "./images/"+card.image);
+			cardimg.setAttribute("src", "./images/"+card.image);
+			$dialog.append($cardchoice);
+			$cardchoice.append(cardimg);
+			$(cardimg).width( $('#supplycard-Copper').width());
+			$(cardimg).height( $('#supplycard-Copper').height());
+			
+			//Now draw the buttons associated with that card
+			for ( var j in com.choice[i].buttons )
+			{
+				var button = com.choice[i].buttons[j];
+				//add a button to the control area with the requested message and action.
+				var choicebutton = document.createElement('button');
+				choicebutton.setAttribute("type","button");
+				choicebutton.innerHTML=button.name;
+				choicebutton.setAttribute("data-card",card.name);
+				choicebutton.setAttribute("data-event",com.choice[i].event);
+				choicebutton.setAttribute("data-option",button.event);
+				$cardchoice.append(choicebutton);
+				$(choicebutton).click(function(event,value) {
+					var message = new choiceresponse($(this).attr('data-event'),$(this).attr('data-card'),$(this).attr('data-option'));
+					ws.send(JSON.stringify(message));
+					$dialog.dialog('close');
+					$dialog.dialog('destroy');
+				});
+			}
+		break;
 		}
 	}
 	$dialog.dialog('open');

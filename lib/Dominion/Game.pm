@@ -109,7 +109,7 @@ sub remove_resolved_interactions {
     my ($self) = @_;
 
     my @pending_interactions = grep { not $_->resolved } $self->interactions;
-    @pending_interactions = grep { not $_->cancelled } @pending_interactions;
+    #@pending_interactions = grep { not $_->can('cancelled') || not $_->cancelled } @pending_interactions;
     $self->set_interactions(\@pending_interactions);
 }
 

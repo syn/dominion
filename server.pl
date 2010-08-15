@@ -102,6 +102,12 @@ websocket '/' => sub {
 								#do I need to tick here?
 								return;
 							}
+							when ('questionresponse') {
+								
+								$player->currentinteraction->choose($message->{'option'});
+								$player->currentinteraction->done;
+								return;
+							}
 							default {print Dumper($message);}
 						}
 					}			

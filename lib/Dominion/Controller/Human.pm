@@ -4,6 +4,7 @@ use 5.010;
 use Moose;
 use List::Util qw(shuffle);
 no warnings 'recursion';
+use Data::Dumper;
 
 extends 'Dominion::Controller';
 
@@ -96,6 +97,22 @@ sub freebuy {
 	$choice->add($option2);
 	$self->player->emit('sendmessage',$choice);		
 	$self->player->game->outstandingchoices($self->player->game->outstandingchoices+1);
+}
+
+sub question {
+    my ($self, $player, $state, $question) = @_;
+    
+    $self->player->currentinteraction($question);
+    
+	my $choice = Dominion::Com::Messages::Choice->new(message => $question->{'message'} , modal => 'true');
+	my @options = $question->options;
+	for my $option (@options) {
+		my $button = Dominion::Com::Messages::Options::Button->new(event => 'questionresponse', name=>$option->{'value'} , param => $option->{'key'});
+		$choice->add($button);
+	}
+	$player->game->outstandingchoices($self->player->game->outstandingchoices+1);
+	$player->emit('sendmessage',$choice);
+		
 }
 
 sub send_hand {

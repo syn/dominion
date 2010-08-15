@@ -5,6 +5,7 @@ extends 'Dominion::Com::Message';
 
 has '+type'      => default => 'choice';
 has 'message'    => ( isa => 'Str', is => 'rw', required => 1 );
+has 'modal'      => ( isa => 'Str', is => 'rw', default => 'false');
 has 'options' => (
     traits   => ['Array'],
     isa      => 'ArrayRef[Dominion::Com::Messages::Option]',
@@ -26,6 +27,7 @@ sub TO_JSON {
 		message =>  $self->message,
 		choice => [$self->options],
 		section   => $self->section,
+		modal => $self->modal,
 	};
 }
 1;
