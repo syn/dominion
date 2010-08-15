@@ -203,6 +203,7 @@ sub draw {
 
     if ( @drawn < $count ) {
         $self->discard->shuffle;
+        $self->emit('deckshuffled');
         $self->deck->add($self->discard->cards);
         push @drawn, $self->deck->draw($count - @drawn);
     }
