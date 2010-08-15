@@ -33,6 +33,7 @@ has 'games' => (
         games_delete   => 'delete',
     },
 );
+has 'tickcount'  => ( isa => 'Int', is => 'rw', default => 0 );
 
 after games_add => sub {
 	my ($self, $game) = @_;
@@ -52,7 +53,11 @@ after games_add => sub {
 sub create_game {
 	my ($self,$player,$message) = @_;
 	my $game = Dominion::Game->new;
-	$game->name($player->name. "'s game");
+	if($message->{'name'} eq '') {
+		$game->name($player->name. "'s game");
+	} else {
+		$game->name($message->{'name'});
+	}
 	$self->games_add($game);
 	$game->add_listener('postgame', sub {
 	    my @results;
@@ -75,11 +80,11 @@ sub create_game {
 	use Dominion::Controller::AI::HalfRetard;
 	use Dominion::Controller::AI::MoneyWhore;
 	use Dominion::Controller::AI::DumbMoney;
-
-	foreach my $AI ( qw(MoneyWhore FullRetard HalfRetard) ) {
-    my $player = Dominion::Player->new(name => $AI);
-    $game->player_add($player);
-    "Dominion::Controller::AI::$AI"->new(player => $player);
+	my @botnames = map { $_->{value} } @{$message->{'bots'}};
+	for my $AI (@botnames) {
+    	my $player = Dominion::Player->new(name => $AI);
+    	$game->player_add($player);
+    	"Dominion::Controller::AI::$AI"->new(player => $player);
 	}
 	return $game;
 	
@@ -109,6 +114,7 @@ my $loop = Mojo::IOLoop->singleton;
 
 sub tick {
 	my ($self) = @_;
+	$self->tickcount($self->tickcount+1);
 	foreach my $game ($self->games) {
 		if( $game->state ne 'postgame' && $game->state ne 'pregame' && $game->outstandingchoices == 0)  {
 			print "tick\n";
@@ -117,6 +123,11 @@ sub tick {
 		if ( $game->state eq 'postgame' && $game->resultssent == 0) {
 			$game->resultssent(1);
 			$game->emit('postgame');
+		}
+	}
+	if ($self->tickcount % 10 == 0) {
+		foreach my $player ($self->players) {
+			$player->emit('sendmessage',Dominion::Com::Messages::Ping->new());
 		}
 	}
 	$loop->timer(0.25 => sub {$self->tick;});

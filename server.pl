@@ -137,12 +137,33 @@ sub chat_message {
 	#}
 }
 
+sub testThief {
+	my($player) = @_;
+	#Send a choice to the player 
+	my $choice = Dominion::Com::Messages::Choice->new(message => 'Test Dialogue Box' );
+	my $option1 = Dominion::Com::Messages::Options::CardChoice->new(event => 'interactionresponse',card => $player->deck->draw(1));
+	my $button1 = Dominion::Com::Messages::Options::Button->new(event => 'trashcard', name=>'Trash Card');
+	my $button2 = Dominion::Com::Messages::Options::Button->new(event => 'keepcard', name=>'Keep Card');
+	$option1->add($button1);
+	$option1->add($button2);
+	$choice->add($option1);
+	
+	my $option2 = Dominion::Com::Messages::Options::CardChoice->new(event => 'interactionresponse',card => $player->deck->draw(1));
+	my $button3 = Dominion::Com::Messages::Options::Button->new(event => 'trashcard', name=>'Trash Card');
+	my $button4 = Dominion::Com::Messages::Options::Button->new(event => 'keepcard', name=>'Keep Card');
+	$option2->add($button3);
+	$option2->add($button4);
+	$choice->add($option2);
+	
+	$player->emit('sendmessage',$choice);	
+}
+
 sub name_change {
 	my ($player, $n) = @_;
 	$player->name($n);
 	if($player->game) {
 		$player->game->send_to_everyone(Dominion::Com::Messages::PlayerStatus->new(action => 'namechange' ,  player => $player));
-	} 
+	}
 }
 
 get '/' => 'index';
