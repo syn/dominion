@@ -46,10 +46,10 @@ has 'player' => (
 			my ($p, $card) = @_;
 		   	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'Discard', card=>$card, player=>$p),$p);
 		});	
-		$player->add_listener('deckshuffled', sub {
-			my ($p) = @_;
-			$p->game->send_to_everyone(Dominion::Com::Messages::Chat->new(section => 'game', message => $p->name . "'s deck shuffle." , from => 'System'));
-		});			
+		#$player->add_listener('deckshuffled', sub {
+			#my ($p) = @_;
+			#$p->game->send_to_everyone(Dominion::Com::Messages::Chat->new(section => 'game', message => $p->name . "'s deck shuffle." , from => 'System'));
+		#});			
         
 
         foreach my $cb ( keys %{$self->curried_callbacks} ) {
