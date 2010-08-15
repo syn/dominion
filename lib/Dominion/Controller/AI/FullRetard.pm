@@ -1,8 +1,8 @@
-package Dominion::AI::FullRetard;
+package Dominion::Controller::AI::FullRetard;
 
 use Moose;
 
-extends 'Dominion::AI';
+extends 'Dominion::Controller::AI';
 
 sub action {
     my ($self, $player, $state) = @_;
