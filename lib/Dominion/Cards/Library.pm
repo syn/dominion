@@ -46,6 +46,7 @@ sub draw {
                         $player->hand->add($card);
                     }
                     else {
+                        $player->emit('discarded',$card);
                         $self->stash->add($card);
                     }
                     if ( $player->hand->count < 7 ) {

@@ -41,6 +41,10 @@ has 'player' => (
 		$player->add_listener('playedcard', sub {
 			my ($p, $card) = @_;
 		   	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'actionplayed', card=>$card, player=>$p),$p);
+		});
+		$player->add_listener('discarded', sub {
+			my ($p, $card) = @_;
+		   	$p->game->send_to_everyone_else(Dominion::Com::Messages::CardPlayed->new(actiontype => 'Discard', card=>$card, player=>$p),$p);
 		});	
 		$player->add_listener('deckshuffled', sub {
 			my ($p) = @_;
