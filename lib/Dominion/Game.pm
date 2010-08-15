@@ -156,7 +156,9 @@ sub tick {
     }
 
     foreach my $pending ( @pending ) {
-        $pending->{player}->response_required($pending->{state}, $pending);
+    	if($self->outstandingchoices == 0 ) {
+        	$pending->{player}->response_required($pending->{state}, $pending);
+    	}
     }
 }
 
