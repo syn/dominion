@@ -2,7 +2,6 @@ package Dominion::Cards::Spy;
 
 use Moose;
 extends 'Dominion::Card';
-use Data::Dumper;
 
 sub name        { 'Spy' }
 sub tags        { qw(kingdom action attack) }
@@ -41,7 +40,6 @@ sub action {
 sub spy {
 	my($self,$player,$otherplayer) = @_;
 	my ($card) = $otherplayer->draw(1);
-	print Dumper($card);
 	$player->game->interaction_add(
 		Dominion::Interaction::Question->new(
 			player  => $player,
